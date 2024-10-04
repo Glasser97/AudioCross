@@ -9,6 +9,10 @@ lifecycleRuntimeKtx = "2.8.5"
 activityCompose = "1.9.1"
 composeBom = "2024.04.01"
 coil = "2.7.0"
+koin_android_version = "4.0.0"
+ktor_version = "2.3.12"
+coroutines = "1.9.0"
+lifecycleCompose = "2.8.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -16,6 +20,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleCompose" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -25,8 +30,20 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material = { group = "androidx.compose.material", name = "material" }
 coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin_android_version" }
+koin-android-compat = { module = "io.insert-koin:koin-android-compat", version.ref = "koin_android_version"  }
+koin-android-workmanager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin_android_version"  }
+#koin-android-navigation = { module = "io.insert-koin:androidx-navigation", version.ref = "koin_android_version"  }
+io-ktor-core = {module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor_version"}
+io-ktor-auth = {module = "io.ktor:ktor-client-auth", version.ref = "ktor_version"}
+io-ktor-okhttp = {module = "io.ktor:ktor-client-okhttp", version.ref = "ktor_version"}
+io-ktor-logging = {module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor_version"}
+io-ktor-content-negotiation = {module = "io.ktor:ktor-client-content-negotiation-jvm", version.ref = "ktor_version"}
+io-ktor-serialization = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor_version" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
