@@ -1,4 +1,4 @@
-package com.grayson.audiocross.presentation
+package com.grayson.audiocross.presentation.albumlist.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

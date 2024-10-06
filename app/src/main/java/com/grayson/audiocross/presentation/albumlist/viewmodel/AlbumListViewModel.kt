@@ -1,4 +1,4 @@
-package com.grayson.audiocross.presentation.viewmodel
+package com.grayson.audiocross.presentation.albumlist.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -8,7 +8,7 @@ import com.grayson.audiocross.domain.albumlist.base.SortMethod
 import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.common.io
-import com.grayson.audiocross.presentation.AlbumCardDisplayItem
+import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +42,7 @@ class AlbumListViewModel : ViewModel() {
     /**
      * current page
      */
-    private var page = 0
+    private var page = 1
 
     /**
      * album list
@@ -62,6 +62,12 @@ class AlbumListViewModel : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
+    /**
+     * loadMore State
+     */
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore
+
 
     // endregion
 
@@ -75,7 +81,7 @@ class AlbumListViewModel : ViewModel() {
                     FetchAlbumListUseCase.Param(
                         orderBy = OrderBy.RANDOM,
                         sortMethod = SortMethod.ASCENDING,
-                        page = page + 1,
+                        page = 1,
                         hasSubtitle = true
                     )
                 )
@@ -95,6 +101,38 @@ class AlbumListViewModel : ViewModel() {
                 }
             }
             _isRefreshing.update { false }
+        }
+    }
+
+    fun loadMoreAlbumList() {
+        viewModelScope.launch {
+            _isLoadingMore.update { true }
+            val result = io {
+                useCaseSet.fetchAlbumListUseCase.execute(
+                    FetchAlbumListUseCase.Param(
+                        orderBy = OrderBy.RANDOM,
+                        sortMethod = SortMethod.ASCENDING,
+                        page = page + 1,
+                        hasSubtitle = true
+                    )
+                )
+            }
+            when (result) {
+                is RequestResult.Success -> {
+                    _albumList.update {
+                        val oldList = _albumList.value
+                        oldList + result.data.albumItems.map {
+                            AlbumCardDisplayItem.mapToDisplayItem(it)
+                        }
+                    }
+                    page = result.data.currentPage
+                }
+
+                is RequestResult.Error -> {
+                    Log.w(TAG, "refreshAlbumList error: ${result.exception}")
+                }
+            }
+            _isLoadingMore.update { false }
         }
     }
 

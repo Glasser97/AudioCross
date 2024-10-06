@@ -1,9 +1,9 @@
-package com.grayson.audiocross.presentation
+package com.grayson.audiocross.presentation.albumlist.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 
 /**
@@ -24,7 +25,9 @@ fun AlbumCardList(
     albumCardDisplayItems: List<AlbumCardDisplayItem>,
     navigatorToPlayer: (AlbumCardDisplayItem) -> Unit = {},
     refreshCallback: () -> Unit = {},
-    isRefreshing: Boolean = false
+    loadingMoreCallback: () -> Unit = {},
+    isRefreshing: Boolean = false,
+    isLoadingMore: Boolean = false
 ) {
     val pullRefreshState = rememberPullRefreshState(isRefreshing, {
         refreshCallback()
@@ -32,11 +35,16 @@ fun AlbumCardList(
 
     Box(modifier.pullRefresh(pullRefreshState)) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(albumCardDisplayItems, key = { it.albumId }) { albumItem ->
+            itemsIndexed(
+                albumCardDisplayItems,
+                key = { _, item -> item.albumId }) { index, albumItem ->
                 AlbumCard(
                     albumCardDisplayItem = albumItem,
                     onClick = { navigatorToPlayer(it) }
                 )
+                if (index >= albumCardDisplayItems.size - 2 && !isLoadingMore) {
+                    loadingMoreCallback()
+                }
             }
         }
         PullRefreshIndicator(

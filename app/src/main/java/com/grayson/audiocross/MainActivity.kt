@@ -14,9 +14,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.grayson.audiocross.presentation.AlbumCardDisplayItem
-import com.grayson.audiocross.presentation.AlbumCardList
-import com.grayson.audiocross.presentation.viewmodel.AlbumListViewModel
+import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
+import com.grayson.audiocross.presentation.albumlist.ui.AlbumCardList
+import com.grayson.audiocross.presentation.albumlist.viewmodel.AlbumListViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,16 +32,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AudioCrossTheme {
-                val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
+                    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+                    val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
                     val albumList: List<AlbumCardDisplayItem> by viewModel.albumList.collectAsStateWithLifecycle()
 
                     AlbumCardList(
                         modifier = Modifier.padding(padding),
                         albumCardDisplayItems = albumList,
                         refreshCallback = { viewModel.refreshAlbumList() },
-                        isRefreshing = isRefreshing
+                        loadingMoreCallback = { viewModel.loadMoreAlbumList() },
+                        isRefreshing = isRefreshing,
+                        isLoadingMore = isLoadingMore
                     )
                 }
             }

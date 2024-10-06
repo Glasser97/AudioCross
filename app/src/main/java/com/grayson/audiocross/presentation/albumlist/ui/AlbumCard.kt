@@ -1,4 +1,4 @@
-package com.grayson.audiocross.presentation
+package com.grayson.audiocross.presentation.albumlist.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.grayson.audiocross.domain.albumlist.model.AlbumItem
+import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 
 /**

@@ -1,4 +1,4 @@
-package com.grayson.audiocross.presentation
+package com.grayson.audiocross.presentation.albumlist.model
 
 import com.grayson.audiocross.domain.albumlist.model.AlbumItem
 
