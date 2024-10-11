@@ -1,7 +1,7 @@
 package com.grayson.audiocross
 
 import com.grayson.audiocross.data.albumlist.clients.AppClient
-import com.grayson.audiocross.data.albumlist.clients.GlobalProperties
+import com.grayson.audiocross.data.login.model.GlobalProperties
 import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.Logger
 import java.net.Proxy

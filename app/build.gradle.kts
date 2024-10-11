@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -63,7 +65,13 @@ dependencies {
     implementation(libs.coil.kt.compose)
     implementation(libs.koin.android)
     implementation(libs.koin.android.compat)
+    implementation(libs.koin.android.compose)
     implementation(libs.koin.android.workmanager)
+//    implementation(libs.koin.android.viewmodel)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 //    implementation(libs.koin.android.navigation)
     implementation(libs.io.ktor.core)
     implementation(libs.io.ktor.auth)
@@ -73,6 +81,7 @@ dependencies {
     implementation(libs.io.ktor.serialization)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

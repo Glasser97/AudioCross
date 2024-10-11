@@ -4,14 +4,15 @@ import com.grayson.audiocross.data.albumlist.base.OrderBy
 import com.grayson.audiocross.data.albumlist.base.SortMethod
 import com.grayson.audiocross.data.albumlist.clients.RequestUtil.parseBody
 import com.grayson.audiocross.data.albumlist.model.work.PaginationWorks
+import com.grayson.audiocross.data.albumlist.model.work.WorkInfo
+import com.grayson.audiocross.data.login.model.GlobalProperties
 import com.grayson.audiocross.domain.common.HttpRequestApi
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 
 internal class WorkClient {
     fun getWorks(
-        getWorksRequest: GetWorksRequest,
-        seed: Int = GlobalProperties.Config.Seed
+        getWorksRequest: GetWorksRequest
     ) = runBlocking {
         val response = RequestUtil.request(
             RequestUtil.getHttpClient(authToken = GlobalProperties.Config.AccessToken),
@@ -19,15 +20,31 @@ internal class WorkClient {
         )
         return@runBlocking response.parseBody<PaginationWorks>()
     }
+
+    fun getWorkInfo(
+        getWorkInfoRequest: GetWorkInfoRequest
+    ) = runBlocking {
+        val response = RequestUtil.request(
+            RequestUtil.getHttpClient(authToken = GlobalProperties.Config.AccessToken),
+            getWorkInfoRequest
+        )
+        return@runBlocking response.parseBody<WorkInfo>()
+    }
 }
+
+class GetWorkInfoRequest(
+    val id: Long
+) : HttpRequestApi(
+    httpMethod = HttpMethod.Get,
+    urlPath = "${GlobalProperties.AudioCrossApi.Path.WorkInfo}/${id}",
+)
 
 class GetWorksRequest(
     val orderBy: OrderBy,
     val sortMethod: SortMethod,
     val page: Int,
     val hasSubtitle: Boolean
-) : HttpRequestApi(
-    httpMethod = HttpMethod.Get,
+) : HttpRequestApi(httpMethod = HttpMethod.Get,
     urlPath = GlobalProperties.AudioCrossApi.Path.AllWorks,
     urlParams = HashMap<String, String>().also { map ->
         map["order"] = orderBy.key
@@ -37,7 +54,6 @@ class GetWorksRequest(
             map["seed"] = "${GlobalProperties.Config.Seed}"
         }
         map["subtitle"] = if (hasSubtitle) "1" else "0"
-    }
-)
+    })
 
 

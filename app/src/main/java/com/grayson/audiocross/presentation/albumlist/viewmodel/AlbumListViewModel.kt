@@ -52,7 +52,7 @@ class AlbumListViewModel : ViewModel() {
         .onStart { refreshAlbumList() }
         .stateIn(
             viewModelScope,
-            started = SharingStarted.WhileSubscribed(10_000),
+            started = SharingStarted.Lazily,
             initialValue = emptyList()
         )
 
@@ -76,8 +76,9 @@ class AlbumListViewModel : ViewModel() {
     fun refreshAlbumList() {
         viewModelScope.launch {
             _isRefreshing.update { true }
+            Log.i(TAG, "refreshAlbumList: start")
             val result = io {
-                useCaseSet.fetchAlbumListUseCase.execute(
+                useCaseSet.fetchAlbumListUseCase.fetch(
                     FetchAlbumListUseCase.Param(
                         orderBy = OrderBy.RANDOM,
                         sortMethod = SortMethod.ASCENDING,
@@ -101,14 +102,16 @@ class AlbumListViewModel : ViewModel() {
                 }
             }
             _isRefreshing.update { false }
+            Log.i(TAG, "refreshAlbumList: end")
         }
     }
 
     fun loadMoreAlbumList() {
         viewModelScope.launch {
             _isLoadingMore.update { true }
+            Log.i(TAG, "loadMoreAlbumList: start")
             val result = io {
-                useCaseSet.fetchAlbumListUseCase.execute(
+                useCaseSet.fetchAlbumListUseCase.fetch(
                     FetchAlbumListUseCase.Param(
                         orderBy = OrderBy.RANDOM,
                         sortMethod = SortMethod.ASCENDING,
@@ -133,6 +136,7 @@ class AlbumListViewModel : ViewModel() {
                 }
             }
             _isLoadingMore.update { false }
+            Log.i(TAG, "loadMoreAlbumList: end")
         }
     }
 

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">AudioCross</string>
+    <string name="login_fail_message">Login failed, please try again.</string>
+    <string name="input_username_message">Please enter the username</string>
+    <string name="input_password_message">Please enter the password</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="welcome_message">Welcome</string>
+
 </resources>

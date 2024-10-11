@@ -1,6 +1,7 @@
 package com.grayson.audiocross.data.albumlist.clients
 
 import com.grayson.audiocross.data.albumlist.clients.RequestUtil.parseBody
+import com.grayson.audiocross.data.login.model.GlobalProperties
 import com.grayson.audiocross.domain.common.HttpRequestApi
 import io.ktor.http.*
 import io.ktor.http.content.Version

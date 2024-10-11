@@ -1,6 +1,6 @@
 [versions]
 agp = "8.5.2"
-kotlin = "1.9.0"
+kotlin = "2.0.20"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -13,6 +13,9 @@ koin_android_version = "4.0.0"
 ktor_version = "2.3.12"
 coroutines = "1.9.0"
 lifecycleCompose = "2.8.6"
+navigationCompose = "2.8.2"
+room = "2.6.1"
+ksp = "2.0.20-1.0.24"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,19 +36,27 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-material = { group = "androidx.compose.material", name = "material" }
 coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin_android_version" }
-koin-android-compat = { module = "io.insert-koin:koin-android-compat", version.ref = "koin_android_version"  }
-koin-android-workmanager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin_android_version"  }
+koin-android-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin_android_version" }
+koin-android-compat = { module = "io.insert-koin:koin-android-compat", version.ref = "koin_android_version" }
+koin-android-viewmodel = { module = "io.insert-koin:koin-android-viewmodel", version.ref = "koin_android_version" }
+koin-android-workmanager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin_android_version" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 #koin-android-navigation = { module = "io.insert-koin:androidx-navigation", version.ref = "koin_android_version"  }
-io-ktor-core = {module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor_version"}
-io-ktor-auth = {module = "io.ktor:ktor-client-auth", version.ref = "ktor_version"}
-io-ktor-okhttp = {module = "io.ktor:ktor-client-okhttp", version.ref = "ktor_version"}
-io-ktor-logging = {module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor_version"}
-io-ktor-content-negotiation = {module = "io.ktor:ktor-client-content-negotiation-jvm", version.ref = "ktor_version"}
+io-ktor-core = { module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor_version" }
+io-ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor_version" }
+io-ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor_version" }
+io-ktor-logging = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor_version" }
+io-ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation-jvm", version.ref = "ktor_version" }
 io-ktor-serialization = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor_version" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

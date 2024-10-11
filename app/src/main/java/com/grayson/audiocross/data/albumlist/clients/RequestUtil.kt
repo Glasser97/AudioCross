@@ -1,5 +1,6 @@
 package com.grayson.audiocross.data.albumlist.clients
 
+import com.grayson.audiocross.data.login.model.GlobalProperties
 import com.grayson.audiocross.domain.common.HttpRequestApi
 import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.exceptions.RequestNotOkException

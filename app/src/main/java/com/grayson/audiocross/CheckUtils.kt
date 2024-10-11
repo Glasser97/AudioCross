@@ -1,6 +1,6 @@
 package com.grayson.audiocross
 
-import com.grayson.audiocross.data.albumlist.clients.GlobalProperties
+import com.grayson.audiocross.data.login.model.GlobalProperties
 import com.grayson.audiocross.domain.exceptions.AccessTokenNotFoundException
 
 fun <T> isNullRun(obj: T?, block: () -> Unit = {}) {

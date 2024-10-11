@@ -1,6 +1,6 @@
 package com.grayson.audiocross.domain.common
 
-import com.grayson.audiocross.data.albumlist.clients.GlobalProperties
+import com.grayson.audiocross.data.login.model.GlobalProperties
 import io.ktor.http.HttpMethod
 import java.io.File
 

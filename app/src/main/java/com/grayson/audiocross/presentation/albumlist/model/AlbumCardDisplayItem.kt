@@ -10,12 +10,15 @@ data class AlbumCardDisplayItem(
     val duration: String,
 ) {
     companion object {
-        fun mapToDisplayItem(album: AlbumItem): AlbumCardDisplayItem {
+        fun mapToDisplayItem(
+            album: AlbumItem,
+            needSrcImage: Boolean = false
+        ): AlbumCardDisplayItem {
             return AlbumCardDisplayItem(
                 albumId = album.albumId,
                 title = album.title,
                 voiceAuthor = album.authorName.joinToString(separator = ", "),
-                coverUrl = album.cover.mediumCoverUrl,
+                coverUrl = if (needSrcImage) album.cover.mainCoverUrl else album.cover.mediumCoverUrl,
                 duration = transformToTimeString(album.duration)
             )
         }

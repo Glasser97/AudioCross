@@ -1,8 +1,10 @@
-package com.grayson.audiocross.data.albumlist.clients
+package com.grayson.audiocross.data.login.client
 
+import com.grayson.audiocross.data.login.model.GlobalProperties
+import com.grayson.audiocross.data.albumlist.clients.RequestUtil
 import com.grayson.audiocross.data.albumlist.clients.RequestUtil.parseBody
-import com.grayson.audiocross.data.albumlist.model.auth.Login
 import com.grayson.audiocross.data.albumlist.model.auth.Register
+import com.grayson.audiocross.data.login.model.LoginResultData
 import com.grayson.audiocross.domain.common.HttpRequestApi
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -14,7 +16,7 @@ internal class AuthClient {
             RequestUtil.getHttpClient(),
             LoginRequest(name, password)
         )
-        return@runBlocking response.parseBody<Login>()
+        return@runBlocking response.parseBody<LoginResultData>()
     }
 
     fun register(name: String, password: String) = runBlocking {
@@ -37,7 +39,7 @@ internal class AuthClient {
 class LoginRequest(name: String, password: String) : HttpRequestApi(
     httpMethod = HttpMethod.Post,
     urlPath = GlobalProperties.AudioCrossApi.Path.AuthMe,
-    urlParams = HashMap<String, String>().also { map ->
+    jsonBody = HashMap<String, String>().also { map ->
         map["name"] = name
         map["password"] = password
     }
