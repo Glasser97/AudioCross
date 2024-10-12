@@ -2,11 +2,14 @@ package com.grayson.audiocross
 
 import android.app.Application
 import com.grayson.audiocross.data.albuminfo.repository.AlbumInfoRepository
+import com.grayson.audiocross.data.albuminfo.repository.AlbumTracksRepository
 import com.grayson.audiocross.data.albumlist.repository.AlbumListRepository
 import com.grayson.audiocross.data.login.dao.UserInfoHelper
 import com.grayson.audiocross.data.login.repository.LoginRepository
 import com.grayson.audiocross.domain.albuminfo.repository.IAlbumInfoRepository
+import com.grayson.audiocross.domain.albuminfo.repository.IAlbumTracksRepository
 import com.grayson.audiocross.domain.albuminfo.usecase.FetchAlbumInfoUseCase
+import com.grayson.audiocross.domain.albuminfo.usecase.FetchAlbumTracksUseCase
 import com.grayson.audiocross.domain.albumlist.repository.IAlbumListRepository
 import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 import com.grayson.audiocross.domain.database.IUserInfoHelper
@@ -38,6 +41,9 @@ class AudioCrossApplication : Application() {
             single<IAlbumInfoRepository> {
                 AlbumInfoRepository()
             }
+            single<IAlbumTracksRepository> {
+                AlbumTracksRepository()
+            }
             single<IUserInfoHelper> {
                 UserInfoHelper()
             }
@@ -52,6 +58,9 @@ class AudioCrossApplication : Application() {
             }
             factory {
                 FetchAlbumInfoUseCase()
+            }
+            factory {
+                FetchAlbumTracksUseCase()
             }
 
             viewModel { parameters ->

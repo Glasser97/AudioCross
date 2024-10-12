@@ -8,6 +8,7 @@ import com.grayson.audiocross.domain.albumlist.base.SortMethod
 import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.common.io
+import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -91,7 +92,7 @@ class AlbumListViewModel : ViewModel() {
                 is RequestResult.Success -> {
                     _albumList.update {
                         result.data.albumItems.map {
-                            AlbumCardDisplayItem.mapToDisplayItem(it)
+                            it.mapToDisplayItem()
                         }
                     }
                     page = result.data.currentPage
@@ -125,7 +126,7 @@ class AlbumListViewModel : ViewModel() {
                     _albumList.update {
                         val oldList = _albumList.value
                         oldList + result.data.albumItems.map {
-                            AlbumCardDisplayItem.mapToDisplayItem(it)
+                            it.mapToDisplayItem()
                         }
                     }
                     page = result.data.currentPage

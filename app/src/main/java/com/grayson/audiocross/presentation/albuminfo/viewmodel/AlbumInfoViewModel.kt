@@ -3,9 +3,14 @@ package com.grayson.audiocross.presentation.albuminfo.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.domain.albuminfo.usecase.FetchAlbumInfoUseCase
+import com.grayson.audiocross.domain.albuminfo.usecase.FetchAlbumTracksUseCase
 import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.common.io
+import com.grayson.audiocross.presentation.albuminfo.mapper.fromDomain
+import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
+import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,7 +32,7 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
     private val useCaseSet = UseCaseSet()
 
     private val defaultAlbumInfo = AlbumCardDisplayItem(
-        0L, "", "", "", ""
+        0L,"RJ101", "", "", "", ""
     )
 
     // endregion
@@ -48,6 +53,19 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
         initialValue = defaultAlbumInfo
     )
 
+
+    private val _albumTracks = MutableStateFlow<List<TrackDisplayItem>>(emptyList())
+    val albumTracks: StateFlow<List<TrackDisplayItem>> = _albumTracks
+        .onStart {
+            if (_albumTracks.value.isEmpty()) {
+                fetchAlbumTracks()
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+        )
+
     // endregion
 
     // region public
@@ -65,7 +83,7 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
             when (result) {
                 is RequestResult.Success -> {
                     _albumInfo.update {
-                        AlbumCardDisplayItem.mapToDisplayItem(result.data, true)
+                        result.data.mapToDisplayItem(true)
                     }
                 }
 
@@ -76,12 +94,40 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
         }
     }
 
+    fun fetchAlbumTracks() {
+        viewModelScope.launch {
+            val result = io {
+                useCaseSet.fetchAlbumTracksUseCase.fetch(
+                    FetchAlbumTracksUseCase.Param(
+                        albumId = albumId
+                    )
+                )
+            }
+            when (result) {
+                is RequestResult.Success -> {
+                    _albumTracks.update {
+                        result.data.map { it.fromDomain() }
+                    }
+                }
+
+                is RequestResult.Error -> {
+                    Log.w(TAG, "fetchAlbumTracks error: ${result.exception}")
+                }
+            }
+        }
+    }
+
+    fun playOrPauseAudio(audio: TrackDisplayItem.TrackAudioDisplayItem) {
+
+    }
+
     // endregion
 
     // region UseCase
 
     private class UseCaseSet {
         val fetchAlbumInfoUseCase: FetchAlbumInfoUseCase by inject(FetchAlbumInfoUseCase::class.java)
+        val fetchAlbumTracksUseCase: FetchAlbumTracksUseCase by inject(FetchAlbumTracksUseCase::class.java)
     }
 
     // endregion

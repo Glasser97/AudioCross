@@ -1,5 +1,6 @@
 package com.grayson.audiocross.data.albumlist.clients
 
+import com.grayson.audiocross.data.albuminfo.model.AlbumTrackData
 import com.grayson.audiocross.data.albumlist.base.OrderBy
 import com.grayson.audiocross.data.albumlist.base.SortMethod
 import com.grayson.audiocross.data.albumlist.clients.RequestUtil.parseBody
@@ -30,6 +31,16 @@ internal class WorkClient {
         )
         return@runBlocking response.parseBody<WorkInfo>()
     }
+
+    fun getWorkTracks(
+        getWorkTracksRequest: GetWorkTracksRequest
+    ) = runBlocking {
+        val response = RequestUtil.request(
+            RequestUtil.getHttpClient(authToken = GlobalProperties.Config.AccessToken),
+            getWorkTracksRequest
+        )
+        return@runBlocking response.parseBody<List<AlbumTrackData>>()
+    }
 }
 
 class GetWorkInfoRequest(
@@ -37,6 +48,13 @@ class GetWorkInfoRequest(
 ) : HttpRequestApi(
     httpMethod = HttpMethod.Get,
     urlPath = "${GlobalProperties.AudioCrossApi.Path.WorkInfo}/${id}",
+)
+
+class GetWorkTracksRequest(
+    val id: Long
+) : HttpRequestApi(
+    httpMethod = HttpMethod.Get,
+    urlPath = "${GlobalProperties.AudioCrossApi.Path.WorkTracks}/${id}",
 )
 
 class GetWorksRequest(

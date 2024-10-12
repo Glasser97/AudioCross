@@ -1,8 +1,10 @@
 package com.grayson.audiocross.data.albumlist.clients
 
+import android.util.Log
 import com.grayson.audiocross.data.login.model.GlobalProperties
 import com.grayson.audiocross.domain.common.HttpRequestApi
 import com.grayson.audiocross.domain.common.RequestResult
+import com.grayson.audiocross.domain.exceptions.CommonError
 import com.grayson.audiocross.domain.exceptions.RequestNotOkException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -62,34 +64,41 @@ object RequestUtil {
     suspend fun request(
         httpClient: HttpClient,
         httpRequestApi: HttpRequestApi
-    ): HttpResponse {
-        return httpClient.request {
-            method = httpRequestApi.httpMethod
-            url {
-                protocol = URLProtocol.HTTPS
-                host = httpRequestApi.urlHost
-                path(httpRequestApi.urlPath)
-                httpRequestApi.urlParams?.let { urlParams ->
-                    urlParams.forEach { (key, value) ->
-                        parameters.append(key, value)
+    ): HttpResponse? {
+        return try {
+            httpClient.request {
+                method = httpRequestApi.httpMethod
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = httpRequestApi.urlHost
+                    path(httpRequestApi.urlPath)
+                    httpRequestApi.urlParams?.let { urlParams ->
+                        urlParams.forEach { (key, value) ->
+                            parameters.append(key, value)
+                        }
                     }
                 }
+                headers {
+                    append(HttpHeaders.Accept, httpRequestApi.acceptContentType)
+                    append(HttpHeaders.UserAgent, GlobalProperties.Config.UserAgent)
+                }
+                httpRequestApi.binaryFile?.let { file ->
+                    setBody(file.readChannel())
+                }
+                httpRequestApi.jsonBody?.let { body ->
+                    contentType(ContentType.Application.Json)
+                    setBody(body)
+                }
             }
-            headers {
-                append(HttpHeaders.Accept, httpRequestApi.acceptContentType)
-                append(HttpHeaders.UserAgent, GlobalProperties.Config.UserAgent)
-            }
-            httpRequestApi.binaryFile?.let { file ->
-                setBody(file.readChannel())
-            }
-            httpRequestApi.jsonBody?.let { body ->
-                contentType(ContentType.Application.Json)
-                setBody(body)
-            }
+        } catch (e: Exception) {
+            Log.e("RequestUtil", "request: ${httpRequestApi.urlPath} failed", e)
+            null
         }
     }
 
-    inline fun <reified T> HttpResponse.parseBody(): RequestResult<T> = runBlocking {
+    inline fun <reified T> HttpResponse?.parseBody(): RequestResult<T> = runBlocking {
+        this@parseBody
+            ?: return@runBlocking RequestResult.Error(RequestNotOkException(CommonError("Response is null")))
         return@runBlocking try {
             RequestResult.Success(body<T>())
         } catch (e: JsonConvertException) {

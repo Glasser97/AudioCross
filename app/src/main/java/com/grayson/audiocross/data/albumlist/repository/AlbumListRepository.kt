@@ -30,6 +30,7 @@ class AlbumListRepository : IAlbumListRepository {
                     AlbumItem(
                         albumId = workInfo.id,
                         title = workInfo.title,
+                        albumCode = workInfo.sourceId,
                         authorName = workInfo.vases.map { vas -> vas.name },
                         cover = AlbumCover(
                             mainCoverUrl = workInfo.mainCoverUrl,

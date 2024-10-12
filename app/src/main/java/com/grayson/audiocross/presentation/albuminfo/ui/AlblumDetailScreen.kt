@@ -1,17 +1,23 @@
 package com.grayson.audiocross.presentation.albuminfo.ui
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,29 +26,96 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCoverImage
 import com.grayson.audiocross.presentation.navigator.ui.BackTopBar
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
+import kotlinx.coroutines.flow.update
 
 @Composable
 fun AlbumDetailScreenStateless(
     modifier: Modifier = Modifier,
     albumCardDisplayItem: AlbumCardDisplayItem,
+    trackList: List<TrackDisplayItem> = emptyList(),
+    onClickAudio: (audio: TrackDisplayItem.TrackAudioDisplayItem) -> Unit = {},
+    onClickText: (text: TrackDisplayItem.TrackTextDisplayItem) -> Unit = {},
+    onClickFolder: (folder: TrackDisplayItem.TrackFolderDisplayItem) -> Unit = {},
     onNavigateUp: () -> Unit = {}
 ) {
 
-    Column(
-        modifier = modifier
-    ) {
-        AlbumDetailCard(
-            albumCardDisplayItem = albumCardDisplayItem,
-            onNavigateUp = onNavigateUp
-        )
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BackTopBar(
+                    onNavigateUp = onNavigateUp
+                )
+                Text(
+                    text = albumCardDisplayItem.albumCode,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceDim,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+            }
+        }
+    ) { innerPadding ->
+        val scrollState: ScrollState = rememberScrollState()
+
+        Column(
+            modifier = modifier
+                .padding(
+                    bottom = innerPadding.calculateBottomPadding(),
+                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr)
+                )
+                .verticalScroll(scrollState)
+        ) {
+            AlbumDetailCard(
+                albumCardDisplayItem = albumCardDisplayItem,
+                onNavigateUp = onNavigateUp
+            )
+
+            trackList.forEach {
+                when (it) {
+                    is TrackDisplayItem.TrackAudioDisplayItem -> {
+                        TrackAudioItemStateLess(
+                            audio = it,
+                            onClick = onClickAudio
+                        )
+                    }
+
+                    is TrackDisplayItem.TrackTextDisplayItem -> {
+                        TrackTextItemStateLess(
+                            text = it,
+                            onClick = onClickText
+                        )
+                    }
+
+                    is TrackDisplayItem.TrackFolderDisplayItem -> {
+                        TrackFolderItemStateLess(
+                            folder = it,
+                            onClick = onClickFolder
+                        )
+                    }
+                }
+            }
+        }
     }
+
 
 }
 
@@ -53,10 +126,16 @@ fun AlbumDetailScreen(
     onNavigateUp: () -> Unit = {}
 ) {
     val displayItem by viewModel.albumInfo.collectAsStateWithLifecycle()
+    val trackList by viewModel.albumTracks.collectAsStateWithLifecycle()
 
     AlbumDetailScreenStateless(
         modifier = modifier,
         albumCardDisplayItem = displayItem,
+        trackList = trackList,
+        onClickAudio = viewModel::playOrPauseAudio,
+        onClickFolder = { folderDisplayItem ->
+            folderDisplayItem.isExpanded.update { !it }
+        },
         onNavigateUp = onNavigateUp
     )
 }
@@ -85,29 +164,6 @@ fun AlbumDetailCard(
                 contentDescription = albumCardDisplayItem.title,
                 modifier = Modifier.fillMaxSize()
             )
-            Row(
-                modifier = Modifier.align(Alignment.TopStart),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BackTopBar(
-                    onNavigateUp = onNavigateUp
-                )
-                Text(
-                    text = albumCardDisplayItem.albumId.toString(),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceDim,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-            }
-
-
 
             Text(
                 text = albumCardDisplayItem.duration,
@@ -160,6 +216,7 @@ private fun AlbumDetailScreenPreview() {
         AlbumDetailScreenStateless(
             albumCardDisplayItem = AlbumCardDisplayItem(
                 101L,
+                "RJ101",
                 "Title is too long,",
                 "Voice Author",
                 "CoverUrl",
@@ -176,6 +233,7 @@ private fun AlbumDetailCardPreview() {
         AlbumDetailCard(
             albumCardDisplayItem = AlbumCardDisplayItem(
                 101L,
+                "RJ101",
                 "Title is too long,",
                 "Voice Author",
                 "CoverUrl",

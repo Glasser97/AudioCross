@@ -112,6 +112,7 @@ fun AudioCardPreview() {
         AlbumCard(
             albumCardDisplayItem = AlbumCardDisplayItem(
                 101L,
+                "RJ101",
                 "Title is too long,",
                 "Voice Author",
                 "CoverUrl",

@@ -17,6 +17,8 @@ data class WorkInfo(
     val hasSubtitle: Boolean,
     @SerializedName("id")
     val id: Long,
+    @SerializedName("source_id")
+    val sourceId: String,
     val mainCoverUrl: String,
     val samCoverUrl: String,
     val thumbnailCoverUrl: String,
@@ -69,6 +71,7 @@ data class WorkInfo(
         if (downloadCount != other.downloadCount) return false
         if (hasSubtitle != other.hasSubtitle) return false
         if (id != other.id) return false
+        if (sourceId != other.sourceId) return false
         if (mainCoverUrl != other.mainCoverUrl) return false
         if (samCoverUrl != other.samCoverUrl) return false
         if (thumbnailCoverUrl != other.thumbnailCoverUrl) return false

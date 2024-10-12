@@ -15,6 +15,7 @@ class AlbumInfoRepository : IAlbumInfoRepository {
                 val workInfo = dataResult.data
                 val albumItem = AlbumItem(
                     albumId = workInfo.id,
+                    albumCode = workInfo.sourceId,
                     title = workInfo.title,
                     authorName = workInfo.vases.map { vas -> vas.name },
                     cover = AlbumCover(

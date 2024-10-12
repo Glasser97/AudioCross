@@ -15,7 +15,7 @@ internal object GlobalProperties {
     }
 
     object AudioCrossApi {
-        const val host = "api.asmr.one/api"
+        const val host = "api.asmr-200.com/api"
 
         object Path {
             // App

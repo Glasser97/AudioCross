@@ -190,9 +190,11 @@ fun AlbumCardListPreview() {
         AlbumCardListScreenViewModeless(
             albumCardDisplayItems = listOf(
                 AlbumCardDisplayItem(
-                    101L, "Title", "Voice Author", "CoverUrl", "2:00:00"
+                    101L,
+                    "RJ101","Title", "Voice Author", "CoverUrl", "2:00:00"
                 ), AlbumCardDisplayItem(
                     102L,
+                    "RJ102",
                     "Title is too long, Title is too long, Title is too long, Title is too long, " + "Title is too long, Title is too long, Title is too long, ",
                     "Voice Author",
                     "CoverUrl",
