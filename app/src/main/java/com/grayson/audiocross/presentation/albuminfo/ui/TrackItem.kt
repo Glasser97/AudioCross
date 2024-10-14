@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grayson.audiocross.R
 import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
+import kotlinx.coroutines.flow.update
 
 // region composable
 
@@ -194,7 +195,8 @@ fun TrackFolderItemStateLess(
                                     color = MaterialTheme.colorScheme.surfaceDim
                                 )
                                 .padding(start = 8.dp),
-                            folder = it
+                            folder = it,
+                            onClick = onClick
                         )
                     }
                 }
@@ -266,7 +268,34 @@ private fun TrackFolderItemPreview() {
                     streamUrl = "test url",
                     downloadUrl = "test url",
                     downsizeStreamUrl = "test url"
-                )
+                ),
+
+                TrackDisplayItem.TrackFolderDisplayItem(
+                    title = "This is Folder Title. This is Folder Title.",
+                    children = listOf(
+                        TrackDisplayItem.TrackTextDisplayItem(
+                            title = "This is Text Title. This is Text Title. This is Text Title. This is Text Title.",
+                            hash = "",
+                            albumTitle = "",
+                            size = 0L,
+                            streamUrl = "test url",
+                            downloadUrl = "test url",
+                        ),
+
+                        TrackDisplayItem.TrackAudioDisplayItem(
+                            title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
+                            hash = "",
+                            albumTitle = "",
+                            duration = "11:20:00",
+                            size = 0L,
+                            streamUrl = "test url",
+                            downloadUrl = "test url",
+                            downsizeStreamUrl = "test url"
+                        )
+                    )
+                ).apply {
+                    this.isExpanded.update { true }
+                }
             )
         ).apply {
             this.isExpanded.value = true

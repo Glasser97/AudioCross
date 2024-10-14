@@ -9,6 +9,7 @@ fun TrackItem.fromDomain(): TrackDisplayItem {
     when (this) {
         is TrackItem.Audio -> {
             return TrackDisplayItem.TrackAudioDisplayItem(
+                domainData = this,
                 title = this.title,
                 hash = this.hash,
                 albumTitle = this.workTitle,
@@ -22,6 +23,7 @@ fun TrackItem.fromDomain(): TrackDisplayItem {
 
         is TrackItem.Text -> {
             return TrackDisplayItem.TrackTextDisplayItem(
+                domainData = this,
                 title = this.title,
                 hash = this.hash,
                 albumTitle = this.workTitle,
@@ -33,6 +35,7 @@ fun TrackItem.fromDomain(): TrackDisplayItem {
 
         is TrackItem.Folder -> {
             return TrackDisplayItem.TrackFolderDisplayItem(
+                domainData = this,
                 title = this.title,
                 children = this.children.map { it.fromDomain() }
             )

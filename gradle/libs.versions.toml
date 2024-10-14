@@ -16,6 +16,7 @@ lifecycleCompose = "2.8.6"
 navigationCompose = "2.8.2"
 room = "2.6.1"
 ksp = "2.0.20-1.0.24"
+exoplayer = "1.4.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,9 @@ koin-android-workmanager = { module = "io.insert-koin:koin-androidx-workmanager"
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayer" }
+androidx-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "exoplayer" }
+androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "exoplayer" }
 #koin-android-navigation = { module = "io.insert-koin:androidx-navigation", version.ref = "koin_android_version"  }
 io-ktor-core = { module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor_version" }
 io-ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor_version" }

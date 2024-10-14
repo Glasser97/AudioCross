@@ -1,5 +1,6 @@
 package com.grayson.audiocross.presentation.albuminfo.model
 
+import com.grayson.audiocross.domain.albuminfo.model.TrackItem
 import kotlinx.coroutines.flow.MutableStateFlow
 
 
@@ -8,7 +9,9 @@ sealed class TrackDisplayItem(
     open val title: String,
 ) {
     data class TrackFolderDisplayItem(
-        override val title: String, val children: List<TrackDisplayItem>
+        val domainData: TrackItem.Folder,
+        override val title: String,
+        val children: List<TrackDisplayItem>
     ) : TrackDisplayItem(
         type = "folder", title = title
     ) {
@@ -17,6 +20,7 @@ sealed class TrackDisplayItem(
 
 
     data class TrackTextDisplayItem(
+        val domainData: TrackItem.Text,
         override val title: String,
         val hash: String,
         val albumTitle: String,
@@ -29,6 +33,7 @@ sealed class TrackDisplayItem(
 
 
     data class TrackAudioDisplayItem(
+        val domainData: TrackItem.Audio,
         override val title: String,
         val hash: String,
         val albumTitle: String,

@@ -47,6 +47,9 @@ class AudioCrossApplication : Application() {
             single<IUserInfoHelper> {
                 UserInfoHelper()
             }
+            single {
+
+            }
             factory {
                 FetchAlbumListUseCase()
             }
