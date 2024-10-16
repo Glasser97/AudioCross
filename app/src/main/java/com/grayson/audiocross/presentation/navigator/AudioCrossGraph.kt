@@ -17,10 +17,16 @@ import com.grayson.audiocross.presentation.login.ui.LoginScreen
 import com.grayson.audiocross.presentation.navigator.viewmodel.AudioCrossViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.domain.login.model.User
+import com.grayson.audiocross.domain.player.IAudioPlayer
+import com.grayson.audiocross.domain.player.PlayerState
 import com.grayson.audiocross.presentation.albuminfo.ui.AlbumDetailScreen
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
+import com.grayson.audiocross.presentation.player.AudioPlayer
+import com.grayson.audiocross.presentation.player.ui.PlayerScreen
+import com.grayson.audiocross.presentation.player.viewmodel.PlayerViewModel
 import org.koin.android.compat.ViewModelCompat.getViewModel
 import org.koin.core.parameter.parametersOf
+import org.koin.java.KoinJavaComponent.inject
 
 const val TRANSITION_TIME = 350
 
@@ -91,9 +97,16 @@ fun AudioCrossGraph(
                         parametersOf(albumId.toLong())
                     })
             AlbumDetailScreen(
+                actions = audioCrossNavActions,
                 viewModel = albumInfoViewModel,
                 onNavigateUp = audioCrossNavActions.navigateUp
             )
+        }
+
+        composable(AudioCrossDestinations.PLAYER_ROUTE) {
+            val player: IAudioPlayer by remember { inject(IAudioPlayer::class.java) }
+            val playerViewModel = PlayerViewModel(audioPlayer = player)
+            PlayerScreen(viewModel = playerViewModel)
         }
     }
 }
@@ -103,6 +116,7 @@ object AudioCrossDestinations {
     const val ALBUM_LIST_ROUTE = "album_list_route"
     const val FAVORITE_ROUTE = "favorite_route"
     const val ALBUM_INFO_ROUTE = "album_info_route"
+    const val PLAYER_ROUTE = "player_route"
 
     private val requiredLoginRoutes = setOf(
         FAVORITE_ROUTE

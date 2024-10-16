@@ -6,5 +6,12 @@
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="welcome_message">Welcome</string>
+    <string name="cd_skip_previous">skip previous</string>
+    <string name="cd_replay10">replay 10 seconds</string>
+    <string name="cd_pause">pause this audio</string>
+    <string name="cd_play">play this audio\n</string>
+    <string name="cd_forward10">forward 10 seconds</string>
+    <string name="cd_skip_next">skip next</string>
+    <string name="cd_album_cover">Album Cover Image</string>
 
 </resources>

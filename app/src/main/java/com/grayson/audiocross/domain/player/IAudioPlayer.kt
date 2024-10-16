@@ -2,10 +2,10 @@ package com.grayson.audiocross.domain.player
 
 import com.grayson.audiocross.domain.albuminfo.model.TrackItem
 import kotlinx.coroutines.flow.StateFlow
-import java.time.Duration
 
 data class PlayerState(
     val currentAudio: TrackItem.Audio? = null,
+    val albumCoverUrl: String = "",
     val playQueue: List<TrackItem.Audio> = emptyList(),
     val playbackSpeed: PlaybackSpeed = PlaybackSpeed.DefaultSpeed,
     val isPlaying: Boolean = false,

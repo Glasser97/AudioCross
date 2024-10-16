@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grayson.audiocross.R
+import com.grayson.audiocross.domain.albuminfo.model.TrackItem
 import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 import kotlinx.coroutines.flow.update
@@ -216,6 +217,17 @@ fun TrackFolderItemStateLess(
 private fun TrackAudioItemPreview() {
     AudioCrossTheme {
         TrackAudioItemStateLess(audio = TrackDisplayItem.TrackAudioDisplayItem(
+            domainData = TrackItem.Audio(
+                title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
+                duration = 1120000L,
+                fileSize = 0L,
+                streamUrl = "test url",
+                downloadUrl = "test url",
+                hash = "test url",
+                streamLowQualityUrl = "test url",
+                work = null,
+                workTitle = "test url"
+            ),
             title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
             hash = "",
             albumTitle = "",
@@ -233,6 +245,16 @@ private fun TrackAudioItemPreview() {
 private fun TrackTextItemPreview() {
     AudioCrossTheme {
         TrackTextItemStateLess(text = TrackDisplayItem.TrackTextDisplayItem(
+            domainData = TrackItem.Text(
+                title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
+                duration = 1120000L,
+                fileSize = 0L,
+                streamUrl = "test url",
+                downloadUrl = "test url",
+                hash = "test url",
+                work = null,
+                workTitle = "test url"
+            ),
             title = "This is Text Title. This is Text Title. This is Text Title. This is Text Title.",
             hash = "",
             albumTitle = "",
@@ -248,9 +270,23 @@ private fun TrackTextItemPreview() {
 private fun TrackFolderItemPreview() {
     AudioCrossTheme {
         TrackFolderItemStateLess(folder = TrackDisplayItem.TrackFolderDisplayItem(
+            domainData = TrackItem.Folder(
+                title = "This is Folder Title. This is Folder Title.",
+                children = emptyList()
+            ),
             title = "This is Folder Title. This is Folder Title.",
             children = listOf(
                 TrackDisplayItem.TrackTextDisplayItem(
+                    domainData = TrackItem.Text(
+                        title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
+                        duration = 1120000L,
+                        fileSize = 0L,
+                        streamUrl = "test url",
+                        downloadUrl = "test url",
+                        hash = "test url",
+                        work = null,
+                        workTitle = "test url"
+                    ),
                     title = "This is Text Title. This is Text Title. This is Text Title. This is Text Title.",
                     hash = "",
                     albumTitle = "",
@@ -258,8 +294,18 @@ private fun TrackFolderItemPreview() {
                     streamUrl = "test url",
                     downloadUrl = "test url",
                 ),
-
                 TrackDisplayItem.TrackAudioDisplayItem(
+                    domainData = TrackItem.Audio(
+                        title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
+                        duration = 1120000L,
+                        fileSize = 0L,
+                        streamUrl = "test url",
+                        downloadUrl = "test url",
+                        hash = "test url",
+                        work = null,
+                        workTitle = "test url",
+                        streamLowQualityUrl = "test url"
+                    ),
                     title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
                     hash = "",
                     albumTitle = "",
@@ -271,9 +317,23 @@ private fun TrackFolderItemPreview() {
                 ),
 
                 TrackDisplayItem.TrackFolderDisplayItem(
+                    domainData = TrackItem.Folder(
+                        title = "This is Folder Title. This is Folder Title.",
+                        children = emptyList()
+                    ),
                     title = "This is Folder Title. This is Folder Title.",
                     children = listOf(
                         TrackDisplayItem.TrackTextDisplayItem(
+                            domainData = TrackItem.Text(
+                                title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
+                                duration = 1120000L,
+                                fileSize = 0L,
+                                streamUrl = "test url",
+                                downloadUrl = "test url",
+                                hash = "test url",
+                                work = null,
+                                workTitle = "test url"
+                            ),
                             title = "This is Text Title. This is Text Title. This is Text Title. This is Text Title.",
                             hash = "",
                             albumTitle = "",
@@ -283,6 +343,17 @@ private fun TrackFolderItemPreview() {
                         ),
 
                         TrackDisplayItem.TrackAudioDisplayItem(
+                            domainData = TrackItem.Audio(
+                                title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
+                                duration = 1120000L,
+                                fileSize = 0L,
+                                streamUrl = "test url",
+                                downloadUrl = "test url",
+                                hash = "test url",
+                                work = null,
+                                workTitle = "test url",
+                                streamLowQualityUrl = "test url"
+                            ),
                             title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
                             hash = "",
                             albumTitle = "",

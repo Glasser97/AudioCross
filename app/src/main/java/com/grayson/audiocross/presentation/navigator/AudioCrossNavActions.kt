@@ -17,6 +17,10 @@ class AudioCrossNavActions(
         navigate(AudioCrossDestinations.ALBUM_INFO_ROUTE + "/${id}")
     }
 
+    val navigateToPlayer: () -> Unit = {
+        navigate(AudioCrossDestinations.PLAYER_ROUTE)
+    }
+
     val popBackStack: (route: String) -> Unit = {
         navController.popBackStack(it, false)
     }

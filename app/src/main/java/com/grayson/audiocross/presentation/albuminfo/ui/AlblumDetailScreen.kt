@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -29,13 +30,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCoverImage
+import com.grayson.audiocross.presentation.navigator.AudioCrossNavActions
 import com.grayson.audiocross.presentation.navigator.ui.BackTopBar
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 import kotlinx.coroutines.flow.update
+import org.koin.java.KoinJavaComponent.inject
 
 @Composable
 fun AlbumDetailScreenStateless(
@@ -121,18 +125,27 @@ fun AlbumDetailScreenStateless(
 
 @Composable
 fun AlbumDetailScreen(
+    actions: AudioCrossNavActions,
     modifier: Modifier = Modifier,
     viewModel: AlbumInfoViewModel,
     onNavigateUp: () -> Unit = {}
 ) {
     val displayItem by viewModel.albumInfo.collectAsStateWithLifecycle()
     val trackList by viewModel.albumTracks.collectAsStateWithLifecycle()
+    val player: IAudioPlayer by remember { inject(IAudioPlayer::class.java) }
 
     AlbumDetailScreenStateless(
         modifier = modifier,
         albumCardDisplayItem = displayItem,
         trackList = trackList,
-        onClickAudio = viewModel::playOrPauseAudio,
+        onClickAudio = { audioDisplayItem ->
+            player.addToQueue(audioDisplayItem.domainData)
+            player.play()
+            actions.navigateToPlayer
+        },
+        onClickText = { textDisplayItem ->
+
+        },
         onClickFolder = { folderDisplayItem ->
             folderDisplayItem.isExpanded.update { !it }
         },

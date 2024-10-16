@@ -16,7 +16,10 @@ import com.grayson.audiocross.domain.database.IUserInfoHelper
 import com.grayson.audiocross.domain.login.repository.ILoginRepository
 import com.grayson.audiocross.domain.login.usecase.LoginInfoCheckUseCase
 import com.grayson.audiocross.domain.login.usecase.LoginUseCase
+import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
+import com.grayson.audiocross.presentation.player.AudioPlayer
+import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
@@ -47,8 +50,8 @@ class AudioCrossApplication : Application() {
             single<IUserInfoHelper> {
                 UserInfoHelper()
             }
-            single {
-
+            single<IAudioPlayer> {
+                AudioPlayer(Dispatchers.Main)
             }
             factory {
                 FetchAlbumListUseCase()
