@@ -14,7 +14,7 @@ class PlayerViewModel(private val audioPlayer: IAudioPlayer) : ViewModel() {
 
 //    private val audioPlayer: IAudioPlayer by inject(IAudioPlayer::class.java)
 
-    val playerUiState: StateFlow<PlayerState> get() = audioPlayer.playerState
+    val playerUiState: StateFlow<PlayerState> = audioPlayer.playerState
 
     // endregion
 

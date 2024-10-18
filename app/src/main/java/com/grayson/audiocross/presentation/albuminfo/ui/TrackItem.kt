@@ -125,6 +125,8 @@ fun TrackTextItemStateLess(
 fun TrackFolderItemStateLess(
     modifier: Modifier = Modifier,
     folder: TrackDisplayItem.TrackFolderDisplayItem,
+    onClickAudio: (audio: TrackDisplayItem.TrackAudioDisplayItem) -> Unit = {},
+    onClickText: (text: TrackDisplayItem.TrackTextDisplayItem) -> Unit = {},
     onClick: (folder: TrackDisplayItem.TrackFolderDisplayItem) -> Unit = {},
 ) {
     val isExpanded by folder.isExpanded.collectAsStateWithLifecycle()
@@ -174,7 +176,8 @@ fun TrackFolderItemStateLess(
                                     color = MaterialTheme.colorScheme.surfaceDim
                                 )
                                 .padding(start = 8.dp),
-                            audio = it
+                            audio = it,
+                            onClick = onClickAudio
                         )
                     }
 
@@ -185,7 +188,8 @@ fun TrackFolderItemStateLess(
                                     color = MaterialTheme.colorScheme.surfaceDim
                                 )
                                 .padding(start = 8.dp),
-                            text = it
+                            text = it,
+                            onClick = onClickText
                         )
                     }
 
@@ -197,6 +201,8 @@ fun TrackFolderItemStateLess(
                                 )
                                 .padding(start = 8.dp),
                             folder = it,
+                            onClickAudio = onClickAudio,
+                            onClickText = onClickText,
                             onClick = onClick
                         )
                     }

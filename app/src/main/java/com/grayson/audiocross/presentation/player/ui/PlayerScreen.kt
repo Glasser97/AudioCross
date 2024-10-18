@@ -53,12 +53,14 @@ import com.grayson.audiocross.ui.theme.AudioCrossTheme
 fun PlayerScreen(
     modifier: Modifier = Modifier,
     viewModel: PlayerViewModel,
+    onNavigateUp: () -> Unit
 ) {
     val playerUiState: PlayerState by viewModel.playerUiState.collectAsStateWithLifecycle()
 
     PlayScreenStateless(
         modifier = modifier,
-        playerUiState = playerUiState
+        playerUiState = playerUiState,
+        onNavigateUp = onNavigateUp
     )
 }
 

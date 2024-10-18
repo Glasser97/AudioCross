@@ -89,8 +89,7 @@ fun AlbumDetailScreenStateless(
                 .verticalScroll(scrollState)
         ) {
             AlbumDetailCard(
-                albumCardDisplayItem = albumCardDisplayItem,
-                onNavigateUp = onNavigateUp
+                albumCardDisplayItem = albumCardDisplayItem
             )
 
             trackList.forEach {
@@ -112,6 +111,8 @@ fun AlbumDetailScreenStateless(
                     is TrackDisplayItem.TrackFolderDisplayItem -> {
                         TrackFolderItemStateLess(
                             folder = it,
+                            onClickAudio = onClickAudio,
+                            onClickText = onClickText,
                             onClick = onClickFolder
                         )
                     }
@@ -139,9 +140,8 @@ fun AlbumDetailScreen(
         albumCardDisplayItem = displayItem,
         trackList = trackList,
         onClickAudio = { audioDisplayItem ->
-            player.addToQueue(audioDisplayItem.domainData)
-            player.play()
-            actions.navigateToPlayer
+            player.play(audioDisplayItem.domainData)
+            actions.navigateToPlayer()
         },
         onClickText = { textDisplayItem ->
 
@@ -157,8 +157,7 @@ fun AlbumDetailScreen(
 @Composable
 fun AlbumDetailCard(
     modifier: Modifier = Modifier,
-    albumCardDisplayItem: AlbumCardDisplayItem,
-    onNavigateUp: () -> Unit = {}
+    albumCardDisplayItem: AlbumCardDisplayItem
 ) {
     Column(
         modifier
@@ -204,7 +203,6 @@ fun AlbumDetailCard(
             textAlign = TextAlign.Start,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 3,
             minLines = 1,
             overflow = TextOverflow.Ellipsis
         )

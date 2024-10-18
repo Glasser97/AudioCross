@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.time.Duration
 import kotlin.reflect.KProperty
 
 class AudioPlayer(
@@ -60,6 +59,7 @@ class AudioPlayer(
                 timeElapsed,
                 _playerSpeed
             ) { currentAudio, queue, isPlaying, timeElapsed, playerSpeed ->
+                Log.d(TAG, "combine: $currentAudio, $queue, $isPlaying, $timeElapsed, $playerSpeed")
                 PlayerState(
                     currentAudio = currentAudio,
                     playQueue = queue,
@@ -68,8 +68,10 @@ class AudioPlayer(
                     playbackSpeed = playerSpeed
                 )
             }.catch {
+                it.printStackTrace()
                 throw it
             }.collect {
+                Log.d(TAG, "collect: $it")
                 _playerState.update { it }
             }
         }
@@ -86,7 +88,7 @@ class AudioPlayer(
     }
 
     override fun removeAllFromQueue() {
-        queue.value = emptyList()
+        queue.update { emptyList() }
     }
 
     override fun play() {
@@ -95,16 +97,19 @@ class AudioPlayer(
             return
         }
 
-        val audio = currentAudio ?: return
+        val audio = currentAudio ?: run {
+            Log.w(TAG, "return because current audio is null")
+            return
+        }
 
-        isPlaying.value = true
+        isPlaying.update { true }
         timerJob = coroutineScope.launch {
             while (isActive && timeElapsed.value <= audio.duration) {
                 delay(playbackSpeed.milliseconds)
                 timeElapsed.update { it + playbackSpeed.milliseconds }
             }
-            isPlaying.value = false
-            timeElapsed.value = 0L
+            isPlaying.update { false }
+            timeElapsed.update { 0L }
 
             if (hasNext()) {
                 next()
@@ -120,7 +125,6 @@ class AudioPlayer(
         if (isPlaying.value) {
             pause()
         }
-
 
         // Keep the current playing audio in the queue
         val playingAudio = currentAudio
@@ -146,14 +150,14 @@ class AudioPlayer(
     }
 
     override fun pause() {
-        isPlaying.value = false
+        isPlaying.update { false }
         timerJob?.cancel()
         timerJob = null
     }
 
     override fun stop() {
-        isPlaying.value = false
-        timeElapsed.value = 0L
+        isPlaying.update { false }
+        timeElapsed.update { 0L }
 
         timerJob?.cancel()
         timerJob = null
@@ -164,22 +168,22 @@ class AudioPlayer(
         if (q.isEmpty()) {
             return
         }
-        timeElapsed.value = 0
+        timeElapsed.update { 0 }
         val nextAudio = q.first()
-        currentAudio = nextAudio
-        queue.value = q - nextAudio
+        _currentAudio.update { nextAudio }
+        queue.update { q - nextAudio }
         play()
     }
 
     override fun previous() {
-        timeElapsed.value = 0
-        isPlaying.value = false
+        timeElapsed.update { 0 }
+        isPlaying.update { false }
         timerJob?.cancel()
         timerJob = null
     }
 
     override fun changePlaybackSpeed(speed: PlaybackSpeed) {
-        _playerSpeed.value = speed
+        _playerSpeed.update { speed }
     }
 
     override fun advanceBy(duration: Long) {
