@@ -43,8 +43,8 @@ fun AlbumTrackData.toDomain(): TrackItem? {
     }
 }
 
-fun WorkData.toDomain(): WorkItem? {
+fun WorkData.toDomain(): WorkItem {
     return WorkItem(
-        id = this.id, sourceId = this.sourceId ?: "", sourceType = this.sourceType ?: ""
+        id = this.id, sourceId = this.sourceId ?: "", sourceType = this.sourceType ?: "", coverUrl = ""
     )
 }

@@ -30,5 +30,5 @@ sealed class TrackItem(val type: String) {
 }
 
 data class WorkItem(
-    val id: Long, val sourceId: String, val sourceType: String
+    val id: Long, val sourceId: String, val sourceType: String, var coverUrl: String
 )

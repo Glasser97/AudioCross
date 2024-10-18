@@ -70,9 +70,11 @@ class AudioPlayer(
             }.catch {
                 it.printStackTrace()
                 throw it
-            }.collect {
-                Log.d(TAG, "collect: $it")
-                _playerState.update { it }
+            }.collect { state ->
+                Log.d(TAG, "collect: $state")
+                _playerState.update {
+                    state
+                }
             }
         }
     }

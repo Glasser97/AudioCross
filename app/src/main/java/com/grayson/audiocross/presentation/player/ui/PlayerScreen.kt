@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -84,7 +85,7 @@ fun PlayScreenStateless(
         ) {
             Spacer(modifier = Modifier.weight(1f))
             AlbumCoverImage(
-                imageUrl = playerUiState.albumCoverUrl,
+                imageUrl = playerUiState.currentAudio?.work?.coverUrl ?: "",
                 contentDescription = stringResource(id = R.string.cd_album_cover),
                 modifier = Modifier
                     .sizeIn(maxWidth = 500.dp, maxHeight = 500.dp)
@@ -98,13 +99,15 @@ fun PlayScreenStateless(
                 style = MaterialTheme.typography.headlineSmall,
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.basicMarquee()
+                modifier = Modifier.basicMarquee().padding(horizontal = 16.dp)
             )
             Text(
                 text = playerUiState.currentAudio?.workTitle ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
             Column(

@@ -3,11 +3,11 @@ package com.grayson.audiocross.presentation.albuminfo.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.domain.albuminfo.usecase.FetchAlbumInfoUseCase
 import com.grayson.audiocross.domain.albuminfo.usecase.FetchAlbumTracksUseCase
 import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.common.io
+import com.grayson.audiocross.presentation.albuminfo.mapper.fillCoverUrl
 import com.grayson.audiocross.presentation.albuminfo.mapper.fromDomain
 import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
 import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
@@ -32,7 +32,7 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
     private val useCaseSet = UseCaseSet()
 
     private val defaultAlbumInfo = AlbumCardDisplayItem(
-        0L,"RJ101", "", "", "", ""
+        0L, "RJ101", "", "", "", ""
     )
 
     // endregion
@@ -66,6 +66,25 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
             initialValue = emptyList()
         )
 
+    private val coverUrl = MutableStateFlow("")
+
+    // endregion
+
+    // region init
+
+    init {
+        viewModelScope.launch {
+            coverUrl.collect { url ->
+                _albumTracks.update {
+                    it.forEach { item ->
+                        item.fillCoverUrl(url)
+                    }
+                    it
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region public
@@ -84,6 +103,9 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
                 is RequestResult.Success -> {
                     _albumInfo.update {
                         result.data.mapToDisplayItem(true)
+                    }
+                    coverUrl.update {
+                        result.data.cover.mainCoverUrl
                     }
                 }
 
@@ -106,7 +128,7 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
             when (result) {
                 is RequestResult.Success -> {
                     _albumTracks.update {
-                        result.data.map { it.fromDomain() }
+                        result.data.map { it.fromDomain() }.onEach { item -> item.fillCoverUrl(coverUrl.value) }
                     }
                 }
 
@@ -115,10 +137,6 @@ class AlbumInfoViewModel(private val albumId: Long) : ViewModel() {
                 }
             }
         }
-    }
-
-    fun playOrPauseAudio(audio: TrackDisplayItem.TrackAudioDisplayItem) {
-
     }
 
     // endregion

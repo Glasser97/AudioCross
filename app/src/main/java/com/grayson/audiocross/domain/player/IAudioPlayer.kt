@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 data class PlayerState(
     val currentAudio: TrackItem.Audio? = null,
-    val albumCoverUrl: String = "",
     val playQueue: List<TrackItem.Audio> = emptyList(),
     val playbackSpeed: PlaybackSpeed = PlaybackSpeed.DefaultSpeed,
     val isPlaying: Boolean = false,

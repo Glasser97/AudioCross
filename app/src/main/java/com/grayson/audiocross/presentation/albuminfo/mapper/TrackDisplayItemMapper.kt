@@ -42,3 +42,21 @@ fun TrackItem.fromDomain(): TrackDisplayItem {
         }
     }
 }
+
+fun TrackDisplayItem.fillCoverUrl(coverUrl: String) {
+    when (this) {
+        is TrackDisplayItem.TrackAudioDisplayItem -> {
+            this.domainData.work?.coverUrl = coverUrl
+        }
+
+        is TrackDisplayItem.TrackTextDisplayItem -> {
+            this.domainData.work?.coverUrl = coverUrl
+        }
+
+        is TrackDisplayItem.TrackFolderDisplayItem -> {
+            this.children.forEach { child ->
+                child.fillCoverUrl(coverUrl)
+            }
+        }
+    }
+}
