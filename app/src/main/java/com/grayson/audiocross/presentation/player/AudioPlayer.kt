@@ -1,6 +1,11 @@
 package com.grayson.audiocross.presentation.player
 
+import android.content.Context
 import android.util.Log
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.util.EventLogger
 import com.grayson.audiocross.domain.albuminfo.model.TrackItem
 import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.domain.player.PlaybackSpeed
@@ -19,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.KProperty
 
 class AudioPlayer(
+    private val context: Context,
     private val mainDispatcher: CoroutineDispatcher
 ) : IAudioPlayer {
 
@@ -46,6 +52,10 @@ class AudioPlayer(
 
     private var timerJob: Job? = null
 
+    private val player: ExoPlayer = ExoPlayer.Builder(context).build()
+
+    private val playListener: Player.Listener = AudioPlayerListener()
+
     // endregion
 
     // region init
@@ -69,7 +79,6 @@ class AudioPlayer(
                 )
             }.catch {
                 it.printStackTrace()
-                throw it
             }.collect { state ->
                 Log.d(TAG, "collect: $state")
                 _playerState.update {
@@ -77,6 +86,9 @@ class AudioPlayer(
                 }
             }
         }
+
+        player.addAnalyticsListener(EventLogger())
+        player.addListener(playListener)
     }
 
     // endregion
@@ -222,7 +234,28 @@ class AudioPlayer(
     }
 
     // endregion
+
+    // region listener
+
+    class AudioPlayerListener : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when (playbackState) {
+                Player.STATE_IDLE -> {}
+                Player.STATE_BUFFERING -> {}
+                Player.STATE_ENDED -> {}
+                Player.STATE_READY -> {}
+            }
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+        }
+    }
+
+// endregion
 }
+
+// region delegate
 
 // Used to enable property delegation
 private operator fun <T> MutableStateFlow<T>.setValue(
@@ -235,3 +268,5 @@ private operator fun <T> MutableStateFlow<T>.setValue(
 
 private operator fun <T> MutableStateFlow<T>.getValue(thisObj: Any?, property: KProperty<*>): T =
     this.value
+
+// endregion

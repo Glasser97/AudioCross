@@ -6,13 +6,10 @@ import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.domain.player.PlaybackSpeed
 import com.grayson.audiocross.domain.player.PlayerState
 import kotlinx.coroutines.flow.StateFlow
-import org.koin.java.KoinJavaComponent.inject
 
 class PlayerViewModel(private val audioPlayer: IAudioPlayer) : ViewModel() {
 
     // region field
-
-//    private val audioPlayer: IAudioPlayer by inject(IAudioPlayer::class.java)
 
     val playerUiState: StateFlow<PlayerState> = audioPlayer.playerState
 

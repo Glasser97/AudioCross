@@ -51,7 +51,10 @@ class AudioCrossApplication : Application() {
                 UserInfoHelper()
             }
             single<IAudioPlayer> {
-                AudioPlayer(Dispatchers.Main)
+                AudioPlayer(
+                    this@AudioCrossApplication.applicationContext,
+                    Dispatchers.Main
+                )
             }
             factory {
                 FetchAlbumListUseCase()
