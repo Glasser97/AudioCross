@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AudioCross"
 include(":app")
- 
+include(":core")

@@ -143,8 +143,8 @@ fun AlbumDetailScreen(
             player.play(audioDisplayItem.domainData)
             actions.navigateToPlayer()
         },
-        onClickText = { textDisplayItem ->
-
+        onClickText = { _ ->
+            // todo text reader
         },
         onClickFolder = { folderDisplayItem ->
             folderDisplayItem.isExpanded.update { !it }

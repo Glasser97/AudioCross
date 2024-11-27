@@ -65,9 +65,10 @@ class GetWorksRequest(
 ) : HttpRequestApi(httpMethod = HttpMethod.Get,
     urlPath = GlobalProperties.AudioCrossApi.Path.AllWorks,
     urlParams = HashMap<String, String>().also { map ->
-        map["order"] = orderBy.key
-        map["sort"] = sortMethod.key
+        map["order"] = OrderBy.NO_NSFW.key
+        map["sort"] = SortMethod.ASCENDING.key
         map["page"] = "$page"
+        map["label"] = "works.sfwOnly"
         if (orderBy == OrderBy.RANDOM) {
             map["seed"] = "${GlobalProperties.Config.Seed}"
         }

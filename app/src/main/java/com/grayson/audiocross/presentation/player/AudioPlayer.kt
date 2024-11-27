@@ -52,10 +52,6 @@ class AudioPlayer(
 
     private var timerJob: Job? = null
 
-    private val player: ExoPlayer = ExoPlayer.Builder(context).build()
-
-    private val playListener: Player.Listener = AudioPlayerListener()
-
     // endregion
 
     // region init
@@ -86,9 +82,6 @@ class AudioPlayer(
                 }
             }
         }
-
-        player.addAnalyticsListener(EventLogger())
-        player.addListener(playListener)
     }
 
     // endregion
@@ -266,7 +259,7 @@ private operator fun <T> MutableStateFlow<T>.setValue(
     this.value = value
 }
 
-private operator fun <T> MutableStateFlow<T>.getValue(thisObj: Any?, property: KProperty<*>): T =
+operator fun <T> MutableStateFlow<T>.getValue(thisObj: Any?, property: KProperty<*>): T =
     this.value
 
 // endregion

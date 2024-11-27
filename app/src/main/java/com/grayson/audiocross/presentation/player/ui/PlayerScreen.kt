@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,10 @@ fun PlayerScreen(
     viewModel: PlayerViewModel,
     onNavigateUp: () -> Unit
 ) {
+    LaunchedEffect(viewModel) {
+
+    }
+
     val playerUiState: PlayerState by viewModel.playerUiState.collectAsStateWithLifecycle()
 
     PlayScreenStateless(
@@ -99,7 +104,9 @@ fun PlayScreenStateless(
                 style = MaterialTheme.typography.headlineSmall,
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.basicMarquee().padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .basicMarquee()
+                    .padding(horizontal = 16.dp)
             )
             Text(
                 text = playerUiState.currentAudio?.workTitle ?: "",

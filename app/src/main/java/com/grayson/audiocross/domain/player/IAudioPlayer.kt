@@ -11,6 +11,18 @@ data class PlayerState(
     val timeElapsed: Long = 0L
 )
 
+fun PlayerState.hasPrevious(): Boolean {
+    val index = playQueue.indexOf(currentAudio)
+    if (index == -1) return false
+    return index > 0
+}
+
+fun PlayerState.hasNext(): Boolean {
+    val index = playQueue.indexOf(currentAudio)
+    if (index == -1) return false
+    return index < playQueue.size - 1
+}
+
 interface IAudioPlayer {
     /**
      * The current state of the player.
