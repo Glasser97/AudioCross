@@ -102,10 +102,7 @@ fun AudioCrossGraph(
         }
 
         composable(AudioCrossDestinations.PLAYER_ROUTE) {
-            val player: IAudioPlayer by remember { inject(IAudioPlayer::class.java) }
-            val playerViewModel = PlayerViewModel(audioPlayer = player)
             PlayerScreen(
-                viewModel = playerViewModel,
                 onNavigateUp = audioCrossNavActions.navigateUp
             )
         }

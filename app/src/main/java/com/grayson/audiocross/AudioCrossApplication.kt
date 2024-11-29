@@ -18,7 +18,6 @@ import com.grayson.audiocross.domain.login.usecase.LoginInfoCheckUseCase
 import com.grayson.audiocross.domain.login.usecase.LoginUseCase
 import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
-import com.grayson.audiocross.presentation.player.AudioPlayer
 import com.grayson.audiocross.presentation.player.ExoAudioPlayer
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext

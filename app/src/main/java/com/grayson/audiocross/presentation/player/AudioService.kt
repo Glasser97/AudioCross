@@ -2,15 +2,10 @@ package com.grayson.audiocross.presentation.player
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Bundle
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import androidx.media3.session.SessionCommand
-import androidx.media3.session.SessionResult
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 
 class AudioService : MediaSessionService(), Player.Listener {
 
@@ -62,7 +57,7 @@ class AudioService : MediaSessionService(), Player.Listener {
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
-        return if (!this::mediaSession.isInitialized) mediaSession else null
+        return if (this::mediaSession.isInitialized) mediaSession else null
     }
 
     // endregion

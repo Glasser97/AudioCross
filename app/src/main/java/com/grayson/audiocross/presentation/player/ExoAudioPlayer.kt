@@ -2,9 +2,11 @@ package com.grayson.audiocross.presentation.player
 
 import android.content.ComponentName
 import android.content.Context
+import android.health.connect.datatypes.SpeedRecord
+import android.os.Bundle
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -12,19 +14,18 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import com.grayson.audiocross.domain.albuminfo.model.TrackItem
+import com.grayson.audiocross.domain.albuminfo.model.WorkItem
 import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.domain.player.PlaybackSpeed
 import com.grayson.audiocross.domain.player.PlayerState
+import com.grayson.audiocross.domain.player.PlayingState
 import com.grayson.audiocross.domain.player.hasNext
 import com.grayson.audiocross.domain.player.hasPrevious
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlin.reflect.KProperty
 
 
@@ -41,25 +42,18 @@ class ExoAudioPlayer(
 
     companion object {
         private const val TAG = "ExoAudioPlayer"
-
-        private const val POSITION_UPDATE_INTERNAL = 1000L
     }
 
     // endregion
 
     // region field
 
-    private val _playerState = MutableStateFlow(PlayerState())
-    private val _currentAudio = MutableStateFlow<TrackItem.Audio?>(null)
-    private val queue = MutableStateFlow<List<TrackItem.Audio>>(emptyList())
-    private val isPlaying = MutableStateFlow(false)
-    private val timePosition = MutableStateFlow(0L)
-    private val _playerSpeed = MutableStateFlow(PlaybackSpeed.DefaultSpeed)
+    private val _playerState = MutableStateFlow(PlayerState.Empty)
+
     private val coroutineScope = CoroutineScope(mainDispatcher)
 
     override val playerState: StateFlow<PlayerState> = _playerState
-    override val currentAudio: TrackItem.Audio? by _currentAudio
-    override val playbackSpeed: PlaybackSpeed = _playerSpeed.value
+
     // region media controller
 
     private val _isReady = MutableStateFlow(false)
@@ -75,77 +69,8 @@ class ExoAudioPlayer(
                 if (this.isDone) {
                     _isReady.update { true }
                     mediaController = this.get()
-                    mediaController?.addListener(
-                        object : Player.Listener {
-
-                            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                                super.onIsPlayingChanged(isPlaying)
-                                if (isPlaying != _playerState.value.isPlaying) {
-                                    _playerState.update {
-                                        it.copy(isPlaying = isPlaying)
-                                    }
-                                }
-                            }
-
-                            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-                                super.onPlayWhenReadyChanged(playWhenReady, reason)
-
-                            }
-
-                            override fun onPlaybackStateChanged(playbackState: Int) {
-                                super.onPlaybackStateChanged(playbackState)
-                                when (playbackState) {
-                                    Player.STATE_IDLE -> {
-                                        Log.i(TAG, "onPlaybackStateChanged: STATE_IDLE")
-                                    }
-
-                                    Player.STATE_BUFFERING -> {
-                                        Log.i(TAG, "onPlaybackStateChanged: STATE_BUFFERING")
-                                    }
-
-                                    Player.STATE_ENDED -> {
-                                        Log.i(TAG, "onPlaybackStateChanged: STATE_ENDED")
-                                    }
-
-                                    Player.STATE_READY -> {
-                                        Log.i(TAG, "onPlaybackStateChanged: STATE_READY")
-                                    }
-                                }
-                            }
-
-                            override fun onPositionDiscontinuity(
-                                oldPosition: Player.PositionInfo,
-                                newPosition: Player.PositionInfo,
-                                reason: Int
-                            ) {
-                                super.onPositionDiscontinuity(oldPosition, newPosition, reason)
-                                Log.d(TAG, "onPositionDiscontinuity: $oldPosition, $newPosition, $reason")
-                                _playerState.update {
-                                    it.copy(timeElapsed = newPosition.positionMs)
-                                }
-                            }
-
-                            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                                super.onMediaItemTransition(mediaItem, reason)
-                            }
-
-                            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-                                super.onTimelineChanged(timeline, reason)
-                            }
-
-                            override fun onEvents(player: Player, events: Player.Events) {
-                                super.onEvents(player, events)
-                            }
-
-                            override fun onPlayerError(error: PlaybackException) {
-                                super.onPlayerError(error)
-                            }
-
-                            override fun onPlayerErrorChanged(error: PlaybackException?) {
-                                super.onPlayerErrorChanged(error)
-                            }
-                        }
-                    )
+                    mediaController?.addListener(ExoPlayerListener())
+                    updateState()
                 }
             }, MoreExecutors.directExecutor())
         }
@@ -156,52 +81,48 @@ class ExoAudioPlayer(
 
     // region init
 
-    init {
-        coroutineScope.launch {
-            combine(
-                _currentAudio,
-                queue,
-                isPlaying,
-                timePosition,
-                _playerSpeed
-            ) { currentAudio, queue, isPlaying, timeElapsed, playerSpeed ->
-                Log.d(TAG, "combine: $currentAudio, $queue, $isPlaying, $timeElapsed, $playerSpeed")
-                PlayerState(
-                    currentAudio = currentAudio,
-                    playQueue = queue,
-                    isPlaying = isPlaying,
-                    timeElapsed = timeElapsed,
-                    playbackSpeed = playerSpeed
-                )
-            }.catch {
-                it.printStackTrace()
-            }.collect { state ->
-                Log.d(TAG, "collect: $state")
-                _playerState.update {
-                    state
-                }
-            }
-        }
-    }
-
     // endregion
 
     // region private
+
+    /**
+     * update player state
+     */
+    override fun updateState() {
+        val currentMediaItem = mediaController?.currentMediaItem ?: return updateToEmptyState()
+        val currentAudio = currentMediaItem.toAudio() ?: return updateToEmptyState()
+        val newState = PlayerState(
+            currentAudio = currentAudio,
+            playQueue = _playerState.value.playQueue,
+            playingState = if (mediaController?.isPlaying == true) PlayingState.PLAYING else PlayingState.PAUSED,
+            currentPosition = mediaController?.currentPosition ?: 0,
+            playbackSpeed = PlaybackSpeed.fromFSpeed(
+                mediaController?.playbackParameters?.speed ?: 1f
+            ),
+            duration = mediaController?.duration ?: 0
+        )
+        Log.d(TAG, "updateState: $newState")
+        _playerState.update { newState }
+    }
+
+    private fun updateToEmptyState() {
+        _playerState.update { PlayerState.Empty }
+    }
 
     // endregion
 
     // region override function
 
     override fun addToQueue(audio: TrackItem.Audio) {
-        queue.update {
-            it + audio
+        _playerState.update {
+            it.copy(playQueue = it.playQueue + audio)
         }
         mediaController?.addMediaItem(audio.toMediaItem())
     }
 
     override fun removeAllFromQueue() {
-        queue.update {
-            emptyList()
+        _playerState.update {
+            it.copy(playQueue = emptyList())
         }
         mediaController?.clearMediaItems()
     }
@@ -215,6 +136,9 @@ class ExoAudioPlayer(
     }
 
     override fun play(audios: List<TrackItem.Audio>) {
+        _playerState.update {
+            it.copy(playQueue = audios)
+        }
         val mediaItems = audios.map { it.toMediaItem() }
         mediaController?.setMediaItems(mediaItems)
         mediaController?.prepare()
@@ -270,19 +194,131 @@ class ExoAudioPlayer(
     }
 
     override fun onSeekingFinished(duration: Long) {
-        val currentAudioDuration = _currentAudio.value?.duration ?: return
+        val currentAudioDuration = playerState.value.duration
         duration.coerceIn(0, currentAudioDuration)
         mediaController?.seekTo(duration)
+        mediaController?.play()
+    }
+
+    // endregion
+
+    // region PLayer.Listener
+
+    inner class ExoPlayerListener : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            super.onIsPlayingChanged(isPlaying)
+            Log.d(TAG, "onIsPlayingChanged: $isPlaying")
+            updateState()
+        }
+
+        override fun onPlayWhenReadyChanged(
+            playWhenReady: Boolean,
+            reason: Int
+        ) {
+            super.onPlayWhenReadyChanged(playWhenReady, reason)
+            Log.d(TAG, "onPlayWhenReadyChanged: $playWhenReady")
+            updateState()
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            Log.d(TAG, "onPlaybackStateChanged: $playbackState")
+            updateState()
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            Log.d(TAG, "onPlayerError: $error")
+            updateToEmptyState()
+        }
+
+        override fun onPositionDiscontinuity(
+            oldPosition: Player.PositionInfo,
+            newPosition: Player.PositionInfo,
+            reason: Int
+        ) {
+            super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+            Log.d(TAG, "onPositionDiscontinuity: $oldPosition, $newPosition, $reason")
+            updateState()
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            super.onMediaItemTransition(mediaItem, reason)
+            Log.d(TAG, "onMediaItemTransition: $mediaItem, $reason")
+            updateState()
+        }
+
+        override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+            super.onTimelineChanged(timeline, reason)
+            Log.d(TAG, "onTimelineChanged: $timeline, $reason")
+            updateState()
+        }
+
+        override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+            super.onShuffleModeEnabledChanged(shuffleModeEnabled)
+            Log.d(TAG, "onShuffleModeEnabledChanged: $shuffleModeEnabled")
+            updateState()
+        }
+
+        override fun onRepeatModeChanged(repeatMode: Int) {
+            super.onRepeatModeChanged(repeatMode)
+            Log.d(TAG, "onRepeatModeChanged: $repeatMode")
+            updateState()
+        }
     }
 
     // endregion
 }
 
+fun WorkItem.toBundle(): Bundle = Bundle().also {
+    it.putLong("id", this.id)
+    it.putString("sourceId", this.sourceId)
+    it.putString("sourceType", this.sourceType)
+    it.putString("coverUrl", this.coverUrl)
+}
+
+fun Bundle.toWorkItem(): WorkItem? {
+    val id = this.getLong("id")
+    val sourceId = this.getString("sourceId") ?: return null
+    val sourceType = this.getString("sourceType") ?: return null
+    val coverUrl = this.getString("coverUrl") ?: return null
+    return WorkItem(id, sourceId, sourceType, coverUrl)
+}
+
 fun TrackItem.Audio.toMediaItem(): MediaItem {
+    val bundle = Bundle().also {
+        it.putString("hash", this.hash)
+        it.putString("title", this.title)
+        it.putBundle("work", this.work?.toBundle())
+        it.putString("workTitle", this.workTitle)
+        it.putString("streamUrl", this.streamUrl)
+        it.putString("streamLowQualityUrl", this.streamLowQualityUrl)
+        it.putString("downloadUrl", this.downloadUrl)
+        it.putLong("fileSize", this.fileSize)
+        it.putLong("duration", this.duration)
+    }
+
     return MediaItem.Builder()
         .setMediaId(this.hash)
         .setUri(this.streamUrl)
+        .setMediaMetadata(MediaMetadata.Builder().setExtras(bundle).build())
+        .setTag(this)
         .build()
+}
+
+fun MediaItem.toAudio(): TrackItem.Audio? {
+    val extra = this.mediaMetadata.extras ?: return null
+    return TrackItem.Audio(
+        hash = extra.getString("hash") ?: return null,
+        title = extra.getString("title") ?: return null,
+        work = extra.getBundle("work")?.toWorkItem() ?: return null,
+        workTitle = extra.getString("workTitle") ?: return null,
+        streamUrl = extra.getString("streamUrl") ?: return null,
+        streamLowQualityUrl = extra.getString("streamLowQualityUrl") ?: return null,
+        downloadUrl = extra.getString("downloadUrl") ?: return null,
+        fileSize = extra.getLong("fileSize"),
+        duration = extra.getLong("duration")
+    )
 }
 
 // Used to enable property delegation
@@ -294,7 +330,7 @@ private operator fun <T> MutableStateFlow<T>.setValue(
     this.value = value
 }
 
-//private operator fun <T> MutableStateFlow<T>.getValue(thisObj: Any?, property: KProperty<*>): T =
-//    this.value
+private operator fun <T> MutableStateFlow<T>.getValue(thisObj: Any?, property: KProperty<*>): T =
+    this.value
 
 // endregion

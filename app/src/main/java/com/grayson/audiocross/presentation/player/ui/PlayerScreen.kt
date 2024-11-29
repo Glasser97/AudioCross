@@ -1,5 +1,6 @@
 package com.grayson.audiocross.presentation.player.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -43,8 +44,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.R
 import com.grayson.audiocross.domain.player.PlayerState
+import com.grayson.audiocross.domain.player.PlayingState
 import com.grayson.audiocross.presentation.albumlist.mapper.transformToTimeString
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCoverImage
 import com.grayson.audiocross.presentation.navigator.ui.BackTopBar
@@ -54,11 +57,12 @@ import com.grayson.audiocross.ui.theme.AudioCrossTheme
 @Composable
 fun PlayerScreen(
     modifier: Modifier = Modifier,
-    viewModel: PlayerViewModel,
+    viewModel: PlayerViewModel = viewModel(),
     onNavigateUp: () -> Unit
 ) {
-    LaunchedEffect(viewModel) {
 
+    LaunchedEffect(viewModel) {
+        viewModel.startUpdateState()
     }
 
     val playerUiState: PlayerState by viewModel.playerUiState.collectAsStateWithLifecycle()
@@ -66,6 +70,16 @@ fun PlayerScreen(
     PlayScreenStateless(
         modifier = modifier,
         playerUiState = playerUiState,
+        playerControlActions = PlayerControlActions(
+            onPlayPress = viewModel::play,
+            onPausePress = viewModel::pause,
+            onAdvanceBy = viewModel::advanceBy,
+            onRewindBy = viewModel::rewindBy,
+            onNext = viewModel::next,
+            onPrevious = viewModel::previous,
+            onSeekingStarted = viewModel::seekStarted,
+            onSeekingFinished = viewModel::seekFinished
+        ),
         onNavigateUp = onNavigateUp
     )
 }
@@ -121,14 +135,14 @@ fun PlayScreenStateless(
                 horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(10f)
             ) {
                 PlayerSlider(
-                    timeElapsed = playerUiState.timeElapsed,
+                    timeElapsed = playerUiState.currentPosition,
                     episodeDuration = playerUiState.currentAudio?.duration ?: 0L,
                     onSeekingStarted = playerControlActions.onSeekingStarted,
                     onSeekingFinished = playerControlActions.onSeekingFinished
                 )
                 PlayerButtons(
                     hasNext = playerUiState.playQueue.isNotEmpty(),
-                    isPlaying = playerUiState.isPlaying,
+                    isPlaying = playerUiState.playingState == PlayingState.PLAYING,
                     onPlayPress = playerControlActions.onPlayPress,
                     onPausePress = playerControlActions.onPausePress,
                     onAdvanceBy = playerControlActions.onAdvanceBy,
@@ -156,11 +170,11 @@ private fun PlayerSlider(
             .padding(horizontal = 16.dp)
     ) {
         var sliderValue by remember(timeElapsed) { mutableLongStateOf(timeElapsed) }
-        val maxRange = ((episodeDuration ?: 0) / 1000).toFloat()
+        val maxRange = ((episodeDuration ?: 0)).toFloat()
 
         Row(Modifier.fillMaxWidth()) {
             Text(
-                text = "${sliderValue.formatString()} • ${episodeDuration?.formatString()}",
+                text = "${(sliderValue / 1000).formatString()} • ${episodeDuration?.formatString()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

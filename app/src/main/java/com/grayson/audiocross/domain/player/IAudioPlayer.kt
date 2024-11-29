@@ -7,9 +7,18 @@ data class PlayerState(
     val currentAudio: TrackItem.Audio? = null,
     val playQueue: List<TrackItem.Audio> = emptyList(),
     val playbackSpeed: PlaybackSpeed = PlaybackSpeed.DefaultSpeed,
-    val isPlaying: Boolean = false,
-    val timeElapsed: Long = 0L
-)
+    val playingState: PlayingState = PlayingState.PAUSED,
+    val currentPosition: Long = 0L,
+    val duration: Long = 0L
+) {
+    companion object {
+        val Empty = PlayerState()
+    }
+}
+
+enum class PlayingState {
+    PLAYING, PAUSED, BUFFERING
+}
 
 fun PlayerState.hasPrevious(): Boolean {
     val index = playQueue.indexOf(currentAudio)
@@ -28,17 +37,6 @@ interface IAudioPlayer {
      * The current state of the player.
      */
     val playerState: StateFlow<PlayerState>
-
-    /**
-     * get current audio
-     */
-    val currentAudio: TrackItem.Audio?
-
-    /**
-     * the current playback speed of which the player increments
-     * in milliseconds
-     */
-    val playbackSpeed: PlaybackSpeed
 
     /**
      * The Speed of which the player increments in milliseconds
@@ -110,4 +108,9 @@ interface IAudioPlayer {
      * Seeks to a given time interval specified in [duration] in milliseconds.
      */
     fun onSeekingFinished(duration: Long)
+
+    /**
+     * update player state
+     */
+    fun updateState()
 }

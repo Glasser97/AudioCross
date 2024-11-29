@@ -16,6 +16,10 @@ fun AlbumItem.mapToDisplayItem(
     )
 }
 
+/**
+ * Transform duration to time string.
+ * @param duration duration in seconds
+ */
 fun transformToTimeString(duration: Long): String {
     val hour = duration / 3600
     val hourStr = if (hour < 10) "0$hour" else "$hour"
