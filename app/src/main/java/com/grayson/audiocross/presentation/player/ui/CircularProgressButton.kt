@@ -38,10 +38,10 @@ fun CircularProgressButton(
 
     Box(
         modifier = modifier
-            .size(50.dp),
+            .size(40.dp),
         contentAlignment = Alignment.Center
     ) {
-        val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
+        val onPrimaryColor = MaterialTheme.colorScheme.surfaceVariant
         val primaryColor = MaterialTheme.colorScheme.primary
         // Draw Circle
         Canvas(
@@ -52,14 +52,14 @@ fun CircularProgressButton(
             drawCircle(
                 color = onPrimaryColor,
                 radius = size.minDimension / 2,
-                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
             )
             drawArc(
                 color = primaryColor,
                 startAngle = -90f,
                 sweepAngle = animatedProgress.value * 360f,
                 useCenter = false,
-                style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
             )
         }
 

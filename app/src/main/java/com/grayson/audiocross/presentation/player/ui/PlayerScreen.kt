@@ -3,12 +3,12 @@ package com.grayson.audiocross.presentation.player.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,12 +17,12 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +47,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.R
 import com.grayson.audiocross.domain.player.PlayerState
 import com.grayson.audiocross.domain.player.PlayingState
+import com.grayson.audiocross.domain.player.hasNext
+import com.grayson.audiocross.domain.player.hasPrevious
 import com.grayson.audiocross.presentation.albumlist.mapper.transformToTimeString
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCoverImage
 import com.grayson.audiocross.presentation.navigator.ui.BackTopBar
@@ -135,7 +137,8 @@ fun PlayScreenStateless(
                     onSeekingFinished = playerControlActions.onSeekingFinished
                 )
                 PlayerButtons(
-                    hasNext = playerUiState.playQueue.isNotEmpty(),
+                    hasPrev = playerUiState.hasPrevious(),
+                    hasNext = playerUiState.hasNext(),
                     isPlaying = playerUiState.playingState == PlayingState.PLAYING,
                     onPlayPress = playerControlActions.onPlayPress,
                     onPausePress = playerControlActions.onPausePress,
@@ -187,6 +190,7 @@ fun Long.formatString(): String {
 
 @Composable
 private fun PlayerButtons(
+    hasPrev: Boolean,
     hasNext: Boolean,
     isPlaying: Boolean,
     onPlayPress: () -> Unit,
@@ -218,59 +222,81 @@ private fun PlayerButtons(
             )
             .semantics { role = Role.Button }
 
-        Image(
-            painter = painterResource(id = R.drawable.icon_skip_previous_24),
-            contentDescription = stringResource(R.string.cd_skip_previous),
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
-            modifier = sideButtonsModifier
-                .clickable(enabled = isPlaying, onClick = onPrevious)
-                .alpha(if (isPlaying) 1f else 0.25f)
-        )
-        Image(painter = painterResource(id = R.drawable.icon_replay_10_24),
-            contentDescription = stringResource(R.string.cd_replay10),
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            modifier = sideButtonsModifier.clickable {
-                onRewindBy(10_000L)
-            })
-        if (isPlaying) {
-            Image(painter = painterResource(id = R.drawable.icon_pause_24),
-                contentDescription = stringResource(R.string.cd_pause),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
-                modifier = primaryButtonModifier
-                    .padding(8.dp)
-                    .clickable {
-                        onPausePress()
-                    })
-        } else {
-            Image(imageVector = Icons.Outlined.PlayArrow,
-                contentDescription = stringResource(R.string.cd_play),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
-                modifier = primaryButtonModifier
-                    .padding(8.dp)
-                    .clickable {
-                        onPlayPress()
-                    })
+        IconButton(
+            onClick = onPrevious,
+            enabled = hasPrev,
+            modifier = sideButtonsModifier.alpha(if (hasPrev) 1f else 0.25f)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.icon_skip_previous_24),
+                contentDescription = stringResource(R.string.cd_skip_previous),
+                contentScale = ContentScale.Inside,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+                modifier = Modifier.fillMaxSize()
+            )
         }
-        Image(painter = painterResource(id = R.drawable.icon_forward_10_24),
-            contentDescription = stringResource(R.string.cd_forward10),
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            modifier = sideButtonsModifier.clickable {
-                onAdvanceBy(10_000L)
-            })
-        Image(
-            painter = painterResource(id = R.drawable.icon_skip_next_24),
-            contentDescription = stringResource(R.string.cd_skip_next),
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+        IconButton(
+            onClick = { onRewindBy(10_000L) },
             modifier = sideButtonsModifier
-                .clickable(enabled = hasNext, onClick = onNext)
-                .alpha(if (hasNext) 1f else 0.25f)
-        )
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.icon_replay_10_24),
+                contentDescription = stringResource(R.string.cd_replay10),
+                contentScale = ContentScale.Inside,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        if (isPlaying) {
+            IconButton(
+                onClick = onPausePress,
+                modifier = primaryButtonModifier.padding(8.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_pause_24),
+                    contentDescription = stringResource(R.string.cd_pause),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        } else {
+            IconButton(
+                onClick = onPlayPress,
+                modifier = primaryButtonModifier
+            ) {
+                Image(
+                    imageVector = Icons.Outlined.PlayArrow,
+                    contentDescription = stringResource(R.string.cd_play),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        IconButton(
+            onClick = { onAdvanceBy(10_000L) },
+            modifier = sideButtonsModifier
+        ) {
+            Image(painter = painterResource(id = R.drawable.icon_forward_10_24),
+                contentDescription = stringResource(R.string.cd_forward10),
+                contentScale = ContentScale.Inside,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                modifier = Modifier.fillMaxSize())
+        }
+        IconButton(
+            onClick = onNext,
+            enabled = hasNext,
+            modifier = sideButtonsModifier.alpha(if (hasNext) 1f else 0.25f)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.icon_skip_next_24),
+                contentDescription = stringResource(R.string.cd_skip_next),
+                contentScale = ContentScale.Inside,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 

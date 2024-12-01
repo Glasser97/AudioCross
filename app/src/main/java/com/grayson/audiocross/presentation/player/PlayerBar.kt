@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -79,6 +80,7 @@ fun PlayerBarStateless(
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1
             )
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = playerBarState?.workTitle ?: "",
                 style = MaterialTheme.typography.bodySmall,
@@ -86,7 +88,7 @@ fun PlayerBarStateless(
                 maxLines = 1
             )
         }
-
+        Spacer(modifier = Modifier.width(10.dp))
         CircularProgressButton(
             progress = playerBarState?.progress ?: 0f,
             onPlayPauseClicked = onPlayOrPause,
