@@ -33,12 +33,13 @@ import kotlinx.coroutines.flow.update
 fun TrackAudioItemStateLess(
     modifier: Modifier = Modifier,
     audio: TrackDisplayItem.TrackAudioDisplayItem,
-    onClick: (audio: TrackDisplayItem.TrackAudioDisplayItem) -> Unit = {},
+    audios: List<TrackDisplayItem.TrackAudioDisplayItem>,
+    onClick: (audio: TrackDisplayItem.TrackAudioDisplayItem, audios: List<TrackDisplayItem.TrackAudioDisplayItem>) -> Unit = { _, _ -> },
 ) {
     Row(modifier = modifier
         .wrapContentHeight()
         .clickable {
-            onClick(audio)
+            onClick(audio, audios)
         }
         .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -125,7 +126,7 @@ fun TrackTextItemStateLess(
 fun TrackFolderItemStateLess(
     modifier: Modifier = Modifier,
     folder: TrackDisplayItem.TrackFolderDisplayItem,
-    onClickAudio: (audio: TrackDisplayItem.TrackAudioDisplayItem) -> Unit = {},
+    onClickAudio: (audio: TrackDisplayItem.TrackAudioDisplayItem, audios: List<TrackDisplayItem.TrackAudioDisplayItem>) -> Unit = { _, _ -> },
     onClickText: (text: TrackDisplayItem.TrackTextDisplayItem) -> Unit = {},
     onClick: (folder: TrackDisplayItem.TrackFolderDisplayItem) -> Unit = {},
 ) {
@@ -177,6 +178,7 @@ fun TrackFolderItemStateLess(
                                 )
                                 .padding(start = 8.dp),
                             audio = it,
+                            audios = folder.children.filterIsInstance<TrackDisplayItem.TrackAudioDisplayItem>(),
                             onClick = onClickAudio
                         )
                     }
@@ -222,7 +224,7 @@ fun TrackFolderItemStateLess(
 @Composable
 private fun TrackAudioItemPreview() {
     AudioCrossTheme {
-        TrackAudioItemStateLess(audio = TrackDisplayItem.TrackAudioDisplayItem(
+        val audio = TrackDisplayItem.TrackAudioDisplayItem(
             domainData = TrackItem.Audio(
                 title = "This is Audio Title. This is Audio Title. This is Audio Title. This is Audio Title.",
                 duration = 1120000L,
@@ -242,7 +244,8 @@ private fun TrackAudioItemPreview() {
             streamUrl = "test url",
             downloadUrl = "test url",
             downsizeStreamUrl = "test url"
-        ), onClick = {})
+        )
+        TrackAudioItemStateLess(audio = audio, audios = listOf(audio), onClick = { _, _ -> })
     }
 }
 

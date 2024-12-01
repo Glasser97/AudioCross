@@ -61,7 +61,7 @@ interface IAudioPlayer {
     /**
      * play the specified list of audios
      */
-    fun play(audios: List<TrackItem.Audio>)
+    fun play(audios: List<TrackItem.Audio>, index: Int = 0)
 
     /**
      * pause the current audio

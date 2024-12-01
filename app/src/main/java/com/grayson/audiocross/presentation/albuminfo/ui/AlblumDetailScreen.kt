@@ -46,7 +46,7 @@ fun AlbumDetailScreenStateless(
     modifier: Modifier = Modifier,
     albumCardDisplayItem: AlbumCardDisplayItem,
     trackList: List<TrackDisplayItem> = emptyList(),
-    onClickAudio: (audio: TrackDisplayItem.TrackAudioDisplayItem) -> Unit = {},
+    onClickAudio: (audio: TrackDisplayItem.TrackAudioDisplayItem, audioList: List<TrackDisplayItem.TrackAudioDisplayItem>) -> Unit = { _, _ -> },
     onClickText: (text: TrackDisplayItem.TrackTextDisplayItem) -> Unit = {},
     onClickFolder: (folder: TrackDisplayItem.TrackFolderDisplayItem) -> Unit = {},
     onNavigateUp: () -> Unit = {}
@@ -97,6 +97,7 @@ fun AlbumDetailScreenStateless(
                     is TrackDisplayItem.TrackAudioDisplayItem -> {
                         TrackAudioItemStateLess(
                             audio = it,
+                            audios = trackList.filterIsInstance<TrackDisplayItem.TrackAudioDisplayItem>(),
                             onClick = onClickAudio
                         )
                     }
@@ -139,8 +140,11 @@ fun AlbumDetailScreen(
         modifier = modifier,
         albumCardDisplayItem = displayItem,
         trackList = trackList,
-        onClickAudio = { audioDisplayItem ->
-            player.play(audioDisplayItem.domainData)
+        onClickAudio = { audioDisplayItem, audioDisplayItems ->
+            player.play(
+                audioDisplayItems.map { it.domainData },
+                audioDisplayItems.indexOf(audioDisplayItem).coerceIn(0, audioDisplayItems.size - 1)
+            )
             actions.navigateToPlayer()
         },
         onClickText = { _ ->

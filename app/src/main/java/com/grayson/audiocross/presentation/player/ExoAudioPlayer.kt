@@ -135,12 +135,14 @@ class ExoAudioPlayer(
         play(listOf(audio))
     }
 
-    override fun play(audios: List<TrackItem.Audio>) {
+    override fun play(audios: List<TrackItem.Audio>, index: Int) {
         _playerState.update {
             it.copy(playQueue = audios)
         }
         val mediaItems = audios.map { it.toMediaItem() }
+        mediaController?.clearMediaItems()
         mediaController?.setMediaItems(mediaItems)
+        mediaController?.seekToDefaultPosition(index.coerceIn(0, mediaItems.size - 1))
         mediaController?.prepare()
         mediaController?.play()
     }
