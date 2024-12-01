@@ -44,6 +44,10 @@ class AudioCrossViewModel : ViewModel() {
         }
     }
 
+    // endregion
+
+    // region private
+
     private fun getUser() {
         viewModelScope.launch {
             userInfoHelper.get().collect { user ->

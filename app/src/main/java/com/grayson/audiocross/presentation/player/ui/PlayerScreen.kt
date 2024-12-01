@@ -1,6 +1,5 @@
 package com.grayson.audiocross.presentation.player.ui
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -60,11 +59,6 @@ fun PlayerScreen(
     viewModel: PlayerViewModel = viewModel(),
     onNavigateUp: () -> Unit
 ) {
-
-    LaunchedEffect(viewModel) {
-        viewModel.startUpdateState()
-    }
-
     val playerUiState: PlayerState by viewModel.playerUiState.collectAsStateWithLifecycle()
 
     PlayScreenStateless(

@@ -6,21 +6,25 @@ import com.grayson.audiocross.domain.albuminfo.model.TrackItem
 import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.domain.player.PlaybackSpeed
 import com.grayson.audiocross.domain.player.PlayerState
+import com.grayson.audiocross.domain.player.PlayingState
+import com.grayson.audiocross.presentation.navigator.model.PlayerBarState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 
 class PlayerViewModel : ViewModel() {
 
-    // region costant
+    // region constant
 
     companion object {
         private const val TAG = "PlayerViewModel"
 
-        private const val POSITION_UPDATE_INTERNAL = 1000L
+        const val POSITION_UPDATE_INTERNAL = 1000L
     }
 
     // endregion
@@ -31,18 +35,64 @@ class PlayerViewModel : ViewModel() {
 
     val playerUiState: StateFlow<PlayerState> = audioPlayer.playerState
 
+    private val _playerBarState = MutableStateFlow<PlayerBarState?>(null)
+    val playerBarState: StateFlow<PlayerBarState?> = _playerBarState
+
     private var job: Job? = null
+
+    // endregion
+
+    // region init
+
+    init {
+        viewModelScope.launch {
+            audioPlayer.playerState.collect { playState ->
+                if (playState.currentAudio != null
+                    && playState.playingState != PlayingState.PAUSED
+                ) {
+                    startUpdateState()
+                } else {
+                    stopUpdateState()
+                }
+                _playerBarState.update {
+                    PlayerBarState(
+                        title = playState.currentAudio?.title ?: "",
+                        workTitle = playState.currentAudio?.workTitle ?: "",
+                        coverUrl = playState.currentAudio?.work?.coverUrl ?: "",
+                        progress = playState.currentPosition.toFloat() / playState.duration,
+                        playingState = playState.playingState
+                    )
+                }
+            }
+        }
+    }
 
     // endregion
 
     // region public
 
     fun startUpdateState() {
+        if (job != null) {
+            return
+        }
         job = viewModelScope.launch {
             while (this.isActive) {
                 updateState()
-                delay(1000)
+                delay(POSITION_UPDATE_INTERNAL)
             }
+        }
+    }
+
+    fun stopUpdateState() {
+        job?.cancel()
+        job = null
+    }
+
+    fun pauseOrPlay() {
+        when (audioPlayer.playerState.value.playingState) {
+            PlayingState.PLAYING -> audioPlayer.pause()
+            PlayingState.PAUSED -> audioPlayer.play()
+            PlayingState.BUFFERING -> Unit
         }
     }
 
@@ -90,15 +140,14 @@ class PlayerViewModel : ViewModel() {
         audioPlayer.updateState()
     }
 
-    // endregion
+// endregion
 
-    // region override
+// region override
 
     override fun onCleared() {
         super.onCleared()
-        job?.cancel()
-        job = null
+        stopUpdateState()
     }
 
-    // endregion
+// endregion
 }
