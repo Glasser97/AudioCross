@@ -21,7 +21,8 @@ class AlbumListRepository : IAlbumListRepository {
                 OrderBy.mapFromDomain(params.orderBy),
                 SortMethod.mapFromDomain(params.sortMethod),
                 params.page,
-                params.hasSubtitle
+                params.hasSubtitle,
+                params.keywords
             )
         )
         return when (dataResult) {

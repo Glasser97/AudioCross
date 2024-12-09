@@ -10,9 +10,14 @@ import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.common.io
 import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
+import com.grayson.audiocross.presentation.albumlist.model.FilterParam
+import com.grayson.audiocross.presentation.albumlist.model.toRequestParam
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -22,12 +27,15 @@ import org.koin.java.KoinJavaComponent.inject
 /**
  * Album List View Model
  */
+@OptIn(FlowPreview::class)
 class AlbumListViewModel : ViewModel() {
 
     // region constant
 
     companion object {
         private const val TAG = "AlbumListViewModel"
+
+        private const val SEARCH_KEYWORDS_DEBOUNCE_TIME = 2000L
     }
 
     // endregion
@@ -69,6 +77,33 @@ class AlbumListViewModel : ViewModel() {
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore: StateFlow<Boolean> = _isLoadingMore
 
+    /**
+     * request filter param (not include page).
+     */
+    private val _filterParam = MutableStateFlow(
+        FilterParam(
+            orderBy = OrderBy.RANDOM,
+            sortMethod = SortMethod.ASCENDING,
+            hasSubtitle = true,
+            keywords = ""
+        )
+    )
+    val filterParam: StateFlow<FilterParam> = _filterParam
+
+    // endregion
+
+    // region init
+
+    init {
+        viewModelScope.launch {
+            _filterParam
+                .debounce(SEARCH_KEYWORDS_DEBOUNCE_TIME)
+                .distinctUntilChanged()
+                .collect { param ->
+                    refreshAlbumList()
+                }
+        }
+    }
 
     // endregion
 
@@ -80,12 +115,7 @@ class AlbumListViewModel : ViewModel() {
             Log.i(TAG, "refreshAlbumList: start")
             val result = io {
                 useCaseSet.fetchAlbumListUseCase.fetch(
-                    FetchAlbumListUseCase.Param(
-                        orderBy = OrderBy.RANDOM,
-                        sortMethod = SortMethod.ASCENDING,
-                        page = 1,
-                        hasSubtitle = true
-                    )
+                    param = filterParam.value.toRequestParam(page = 1)
                 )
             }
             when (result) {
@@ -107,18 +137,19 @@ class AlbumListViewModel : ViewModel() {
         }
     }
 
+    fun updateKeywords(keywords: String) {
+        _filterParam.update {
+            it.copy(keywords = keywords)
+        }
+    }
+
     fun loadMoreAlbumList() {
         viewModelScope.launch {
             _isLoadingMore.update { true }
             Log.i(TAG, "loadMoreAlbumList: start")
             val result = io {
                 useCaseSet.fetchAlbumListUseCase.fetch(
-                    FetchAlbumListUseCase.Param(
-                        orderBy = OrderBy.RANDOM,
-                        sortMethod = SortMethod.ASCENDING,
-                        page = page + 1,
-                        hasSubtitle = true
-                    )
+                    param = filterParam.value.toRequestParam(page + 1)
                 )
             }
             when (result) {

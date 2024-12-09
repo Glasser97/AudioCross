@@ -3,12 +3,16 @@ package com.grayson.audiocross.presentation.albumlist.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.TextField
 import androidx.compose.material3.IconButton
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -25,8 +29,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.R
@@ -44,12 +50,14 @@ fun AlbumCardListScreenViewModeless(
     modifier: Modifier = Modifier,
     albumCardDisplayItems: List<AlbumCardDisplayItem>,
     userInfo: User? = null,
+    searchKeyWords: String = "",
     isRefreshing: Boolean = false,
     isLoadingMore: Boolean = false,
+    onSearchTextChanged: (String) -> Unit = {},
     refreshAlbumList: () -> Unit = {},
     loadMoreAlbumList: () -> Unit = {},
     navigatorToPlayer: (AlbumCardDisplayItem) -> Unit = {},
-    navigatorToSearch: () -> Unit = {},
+    onClickSearch: () -> Unit = {},
     navigatorToLogin: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
@@ -77,12 +85,14 @@ fun AlbumCardListScreenViewModeless(
         Scaffold(
             modifier = modifier, topBar = {
                 AlbumListTopBar(
+                    searchKeyWords = searchKeyWords,
+                    onSearchTextChanged = onSearchTextChanged,
                     onClickMenu = {
                         scope.launch {
                             drawerState.open()
                         }
                     },
-                    onClickSearch = navigatorToSearch
+                    onClickSearch = onClickSearch
                 )
             }, containerColor = MaterialTheme.colorScheme.surface
         ) { padding ->
@@ -128,16 +138,21 @@ fun AlbumCardListScreen(
     val isLoadingMore by listViewModel.isLoadingMore.collectAsStateWithLifecycle()
     val albumCardDisplayItems: List<AlbumCardDisplayItem> by listViewModel.albumList.collectAsStateWithLifecycle()
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
+    val filterParam by listViewModel.filterParam.collectAsStateWithLifecycle()
     AlbumCardListScreenViewModeless(
         modifier = modifier,
         navigatorToPlayer = navigatorToDetail,
         albumCardDisplayItems = albumCardDisplayItems,
         userInfo = uiState.user,
+        searchKeyWords = filterParam.keywords ?: "",
         isRefreshing = isRefreshing,
         isLoadingMore = isLoadingMore,
+        onSearchTextChanged = { text ->
+            listViewModel.updateKeywords(text)
+        },
         refreshAlbumList = { listViewModel.refreshAlbumList() },
         loadMoreAlbumList = { listViewModel.loadMoreAlbumList() },
-        navigatorToSearch = navigatorToSearch,
+        onClickSearch = navigatorToSearch,
         navigatorToLogin = navigatorToLogin,
         onLogout = {
             mainViewModel.onLogout()
@@ -148,6 +163,8 @@ fun AlbumCardListScreen(
 @Composable
 fun AlbumListTopBar(
     modifier: Modifier = Modifier,
+    searchKeyWords: String = "",
+    onSearchTextChanged: (String) -> Unit = {},
     onClickMenu: () -> Unit = {},
     onClickSearch: () -> Unit = {}
 ) {
@@ -165,9 +182,34 @@ fun AlbumListTopBar(
             )
         }
 
+        Spacer(modifier = Modifier.width(8.dp))
+
+        TextField(
+            value = searchKeyWords,
+            onValueChange = onSearchTextChanged,
+            modifier = Modifier
+                .weight(1f)
+                .height(36.dp),
+            textStyle = TextStyle(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 12.sp
+            ),
+            trailingIcon = {
+                IconButton(onClick = onClickSearch) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.icon_search_24),
+                        contentDescription = null
+                    )
+                }
+            },
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
         IconButton(onClick = onClickSearch) {
             Icon(
-                painter = painterResource(id = R.drawable.icon_search_24),
+                painter = painterResource(id = R.drawable.icon_favorite_border_24),
                 contentDescription = null
             )
         }
@@ -179,7 +221,11 @@ fun AlbumListTopBar(
 @Composable
 private fun AlbumListTopBarPreview() {
     AudioCrossTheme {
-        AlbumListTopBar()
+        AlbumListTopBar(
+            searchKeyWords = "RJ101",
+            onClickMenu = {},
+            onClickSearch = {}
+        )
     }
 }
 
@@ -188,10 +234,11 @@ private fun AlbumListTopBarPreview() {
 fun AlbumCardListPreview() {
     AudioCrossTheme {
         AlbumCardListScreenViewModeless(
+            searchKeyWords = "RJ101",
             albumCardDisplayItems = listOf(
                 AlbumCardDisplayItem(
                     101L,
-                    "RJ101","Title", "Voice Author", "CoverUrl", "2:00:00"
+                    "RJ101", "Title", "Voice Author", "CoverUrl", "2:00:00"
                 ), AlbumCardDisplayItem(
                     102L,
                     "RJ102",

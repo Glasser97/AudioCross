@@ -21,7 +21,8 @@ class FetchAlbumListUseCase {
         val orderBy: OrderBy,
         val sortMethod: SortMethod,
         val page: Int,
-        val hasSubtitle: Boolean
+        val hasSubtitle: Boolean,
+        val keywords: String? = null
     )
 }
 
