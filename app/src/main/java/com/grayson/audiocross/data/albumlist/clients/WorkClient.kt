@@ -61,17 +61,15 @@ class GetWorksRequest(
     val orderBy: OrderBy,
     val sortMethod: SortMethod,
     val page: Int,
-    val hasSubtitle: Boolean,
-    val keywords: String? = null
+    val hasSubtitle: Boolean
 ) : HttpRequestApi(httpMethod = HttpMethod.Get,
     urlPath = GlobalProperties.AudioCrossApi.Path.AllWorks,
     urlParams = HashMap<String, String>().also { map ->
-        map["order"] = OrderBy.NO_NSFW.key
-        map["sort"] = SortMethod.ASCENDING.key
+        map["order"] = orderBy.key
+        map["sort"] = sortMethod.key
         map["page"] = "$page"
-        map["label"] = "works.sfwOnly"
-        if (!keywords.isNullOrBlank()) {
-            map["keyword"] = keywords
+        if (orderBy == OrderBy.NO_NSFW) {
+            map["label"] = "works.sfwOnly"
         }
         if (orderBy == OrderBy.RANDOM) {
             map["seed"] = "${GlobalProperties.Config.Seed}"

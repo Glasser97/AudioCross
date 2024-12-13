@@ -14,6 +14,7 @@ import com.grayson.audiocross.domain.login.model.User
 import com.grayson.audiocross.presentation.albuminfo.ui.AlbumDetailScreen
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
 import com.grayson.audiocross.presentation.player.ui.PlayerScreen
+import com.grayson.audiocross.presentation.search.ui.SearchScreen
 import org.koin.android.compat.ViewModelCompat.getViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -63,6 +64,7 @@ fun AudioCrossGraph(
         composable(AudioCrossDestinations.ALBUM_LIST_ROUTE) {
             AlbumCardListScreen(
                 navigatorToLogin = audioCrossNavActions.navigateToLogin,
+                navigatorToSearch = audioCrossNavActions.navigateToSearch,
                 navigatorToDetail = { albumCardDisplayItem ->
                     audioCrossNavActions.navigateToDetail(albumCardDisplayItem.albumId)
                 }
@@ -90,7 +92,17 @@ fun AudioCrossGraph(
                 onNavigateUp = audioCrossNavActions.navigateUp
             )
         }
+
+        composable(AudioCrossDestinations.SEARCH_ROUTE) {
+            SearchScreen(
+                navigatorToDetail = { albumCardDisplayItem ->
+                    audioCrossNavActions.navigateToDetail(albumCardDisplayItem.albumId)
+                },
+                onNavigateUp = audioCrossNavActions.navigateUp
+            )
+        }
     }
+
 }
 
 object AudioCrossDestinations {
@@ -99,6 +111,7 @@ object AudioCrossDestinations {
     const val FAVORITE_ROUTE = "favorite_route"
     const val ALBUM_INFO_ROUTE = "album_info_route"
     const val PLAYER_ROUTE = "player_route"
+    const val SEARCH_ROUTE = "search_route"
 
     private val requiredLoginRoutes = setOf(
         FAVORITE_ROUTE

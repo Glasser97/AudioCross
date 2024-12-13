@@ -21,7 +21,7 @@ fun BackTopBar(
     ) {
         Icon(
             Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = null,
+            contentDescription = "Go back",
             tint = MaterialTheme.colorScheme.primary
         )
     }

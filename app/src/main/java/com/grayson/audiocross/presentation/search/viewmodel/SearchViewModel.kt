@@ -1,21 +1,23 @@
-package com.grayson.audiocross.presentation.albumlist.viewmodel
+package com.grayson.audiocross.presentation.search.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grayson.audiocross.domain.albumlist.base.OrderBy
 import com.grayson.audiocross.domain.albumlist.base.SortMethod
-import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.common.io
+import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
 import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
-import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
-import com.grayson.audiocross.presentation.albumlist.model.toRequestParam
+import com.grayson.audiocross.presentation.search.model.SearchFilterParam
+import com.grayson.audiocross.presentation.search.model.toRequestParam
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -23,15 +25,17 @@ import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 
 /**
- * Album List View Model
+ * Search Album View Model
  */
 @OptIn(FlowPreview::class)
-class AlbumListViewModel : ViewModel() {
+class SearchViewModel : ViewModel() {
 
     // region constant
 
     companion object {
-        private const val TAG = "AlbumListViewModel"
+        private const val TAG = "SearchViewModel"
+
+        private const val SEARCH_DEBOUNCE_TIME = 1500L
     }
 
     // endregion
@@ -42,7 +46,7 @@ class AlbumListViewModel : ViewModel() {
 
     // endregion
 
-    // region states
+    // region state
 
     /**
      * current page
@@ -77,13 +81,14 @@ class AlbumListViewModel : ViewModel() {
      * request filter param (not include page).
      */
     private val _filterParam = MutableStateFlow(
-        AlbumListFilterParam(
+        SearchFilterParam(
             orderBy = OrderBy.CREATED_DATE,
             sortMethod = SortMethod.DESCENDING,
-            hasSubtitle = true
+            hasSubtitle = true,
+            keywords = ""
         )
     )
-    val filterParam: StateFlow<AlbumListFilterParam> = _filterParam
+    val filterParam: StateFlow<SearchFilterParam> = _filterParam
 
     // endregion
 
@@ -91,13 +96,17 @@ class AlbumListViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            _filterParam.collect {
-                refreshAlbumList()
-            }
+            _filterParam
+                .debounce(SEARCH_DEBOUNCE_TIME)
+                .distinctUntilChanged().collect { param ->
+                    refreshAlbumList()
+                }
         }
     }
 
     // endregion
+
+    // region public
 
     // region public
 
@@ -106,7 +115,7 @@ class AlbumListViewModel : ViewModel() {
             _isRefreshing.update { true }
             Log.i(TAG, "refreshAlbumList: start")
             val result = io {
-                useCaseSet.fetchAlbumListUseCase.fetch(
+                useCaseSet.searchAlbumListUseCase.fetch(
                     param = filterParam.value.toRequestParam(page = 1)
                 )
             }
@@ -129,12 +138,18 @@ class AlbumListViewModel : ViewModel() {
         }
     }
 
+    fun updateKeywords(keywords: String) {
+        _filterParam.update {
+            it.copy(keywords = keywords)
+        }
+    }
+
     fun loadMoreAlbumList() {
         viewModelScope.launch {
             _isLoadingMore.update { true }
             Log.i(TAG, "loadMoreAlbumList: start")
             val result = io {
-                useCaseSet.fetchAlbumListUseCase.fetch(
+                useCaseSet.searchAlbumListUseCase.fetch(
                     param = filterParam.value.toRequestParam(page + 1)
                 )
             }
@@ -163,7 +178,7 @@ class AlbumListViewModel : ViewModel() {
     // region UseCase
 
     private class UseCaseSet {
-        val fetchAlbumListUseCase: FetchAlbumListUseCase by inject(FetchAlbumListUseCase::class.java)
+        val searchAlbumListUseCase: SearchAlbumListUseCase by inject(SearchAlbumListUseCase::class.java)
     }
 
     // endregion

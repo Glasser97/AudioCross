@@ -4,17 +4,15 @@ import com.grayson.audiocross.domain.albumlist.base.OrderBy
 import com.grayson.audiocross.domain.albumlist.base.SortMethod
 import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 
-data class FilterParam(
+data class AlbumListFilterParam(
     val orderBy: OrderBy,
     val sortMethod: SortMethod,
-    val hasSubtitle: Boolean,
-    val keywords: String? = null
+    val hasSubtitle: Boolean
 )
 
-fun FilterParam.toRequestParam(page: Int) = FetchAlbumListUseCase.Param(
+fun AlbumListFilterParam.toRequestParam(page: Int) = FetchAlbumListUseCase.Param(
     this.orderBy,
     this.sortMethod,
     page,
-    this.hasSubtitle,
-    this.keywords
+    this.hasSubtitle
 )

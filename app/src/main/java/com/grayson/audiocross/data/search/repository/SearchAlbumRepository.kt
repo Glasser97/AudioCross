@@ -1,27 +1,25 @@
-package com.grayson.audiocross.data.albumlist.repository
+package com.grayson.audiocross.data.search.repository
 
 import com.grayson.audiocross.data.albumlist.base.OrderBy
 import com.grayson.audiocross.data.albumlist.base.SortMethod
-import com.grayson.audiocross.data.albumlist.clients.GetWorksRequest
-import com.grayson.audiocross.data.albumlist.clients.WorkClient
+import com.grayson.audiocross.data.search.client.SearchClient
+import com.grayson.audiocross.data.search.client.SearchWorksRequest
 import com.grayson.audiocross.domain.albumlist.model.AlbumCover
 import com.grayson.audiocross.domain.albumlist.model.AlbumItem
 import com.grayson.audiocross.domain.albumlist.model.FetchAlbumListResult
-import com.grayson.audiocross.domain.albumlist.repository.IAlbumListRepository
-import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 import com.grayson.audiocross.domain.common.RequestResult
+import com.grayson.audiocross.domain.search.repository.ISearchAlbumRepository
+import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
 
-/**
- * Fetch Album List repository implementation
- */
-class AlbumListRepository : IAlbumListRepository {
-    override suspend fun fetchAlbumList(params: FetchAlbumListUseCase.Param): RequestResult<FetchAlbumListResult> {
-        val dataResult = WorkClient().getWorks(
-            GetWorksRequest(
+class SearchAlbumRepository : ISearchAlbumRepository {
+    override suspend fun searchAlbumList(params: SearchAlbumListUseCase.Param): RequestResult<FetchAlbumListResult> {
+        val dataResult = SearchClient().searchWorks(
+            SearchWorksRequest(
                 OrderBy.mapFromDomain(params.orderBy),
                 SortMethod.mapFromDomain(params.sortMethod),
                 params.page,
-                params.hasSubtitle
+                params.hasSubtitle,
+                params.keywords
             )
         )
         return when (dataResult) {

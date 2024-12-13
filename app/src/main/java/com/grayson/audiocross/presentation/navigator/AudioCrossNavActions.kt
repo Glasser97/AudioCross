@@ -2,7 +2,6 @@ package com.grayson.audiocross.presentation.navigator
 
 import androidx.navigation.NavHostController
 import com.grayson.audiocross.domain.login.model.User
-import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
 import com.grayson.audiocross.presentation.navigator.AudioCrossDestinations.requireLogin
 
 class AudioCrossNavActions(
@@ -20,6 +19,10 @@ class AudioCrossNavActions(
 
     val navigateToPlayer: () -> Unit = {
         navigate(AudioCrossDestinations.PLAYER_ROUTE)
+    }
+
+    val navigateToSearch: () -> Unit = {
+        navigate(AudioCrossDestinations.SEARCH_ROUTE)
     }
 
     val popBackStack: (route: String) -> Unit = {

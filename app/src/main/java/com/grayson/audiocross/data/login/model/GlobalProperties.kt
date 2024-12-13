@@ -32,6 +32,9 @@ internal object GlobalProperties {
             // WorkDetail
             const val WorkInfo = "work"
             const val WorkTracks = "tracks"
+
+            // SearchRepo
+            const val SearchWorks = "search"
         }
     }
 }

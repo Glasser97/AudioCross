@@ -6,6 +6,7 @@ import com.grayson.audiocross.data.albuminfo.repository.AlbumTracksRepository
 import com.grayson.audiocross.data.albumlist.repository.AlbumListRepository
 import com.grayson.audiocross.data.login.dao.UserInfoHelper
 import com.grayson.audiocross.data.login.repository.LoginRepository
+import com.grayson.audiocross.data.search.repository.SearchAlbumRepository
 import com.grayson.audiocross.domain.albuminfo.repository.IAlbumInfoRepository
 import com.grayson.audiocross.domain.albuminfo.repository.IAlbumTracksRepository
 import com.grayson.audiocross.domain.albuminfo.usecase.FetchAlbumInfoUseCase
@@ -17,6 +18,8 @@ import com.grayson.audiocross.domain.login.repository.ILoginRepository
 import com.grayson.audiocross.domain.login.usecase.LoginInfoCheckUseCase
 import com.grayson.audiocross.domain.login.usecase.LoginUseCase
 import com.grayson.audiocross.domain.player.IAudioPlayer
+import com.grayson.audiocross.domain.search.repository.ISearchAlbumRepository
+import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
 import com.grayson.audiocross.presentation.player.ExoAudioPlayer
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +38,9 @@ class AudioCrossApplication : Application() {
         super.onCreate()
 
         val appModule = module {
+            single<ISearchAlbumRepository> {
+                SearchAlbumRepository()
+            }
             single<IAlbumListRepository> {
                 AlbumListRepository()
             }
@@ -55,6 +61,9 @@ class AudioCrossApplication : Application() {
                     this@AudioCrossApplication.applicationContext,
                     Dispatchers.Main
                 )
+            }
+            factory {
+                SearchAlbumListUseCase()
             }
             factory {
                 FetchAlbumListUseCase()
