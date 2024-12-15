@@ -87,7 +87,32 @@ fun AudioCrossGraph(
             )
         }
 
-        composable(AudioCrossDestinations.PLAYER_ROUTE) {
+        composable(AudioCrossDestinations.PLAYER_ROUTE,
+            enterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up,
+                    animationSpec = tween(TRANSITION_TIME)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up,
+                    animationSpec = tween(TRANSITION_TIME)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    animationSpec = tween(TRANSITION_TIME)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Down,
+                    animationSpec = tween(TRANSITION_TIME)
+                )
+            },
+            ) {
             PlayerScreen(
                 onNavigateUp = audioCrossNavActions.navigateUp
             )

@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -88,9 +90,16 @@ fun PlayScreenStateless(
     onNavigateUp: () -> Unit = {}
 ) {
     Scaffold(modifier = modifier, topBar = {
-        BackTopBar(
-            onNavigateUp = onNavigateUp
-        )
+        IconButton(
+            modifier = modifier.height(45.dp),
+            onClick = onNavigateUp
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.icon_arrow_down_24dp),
+                contentDescription = "Go back",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     }) { innerPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
