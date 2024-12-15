@@ -13,5 +13,12 @@
     <string name="cd_forward10">forward 10 seconds</string>
     <string name="cd_skip_next">skip next</string>
     <string name="cd_album_cover">Album Cover Image</string>
-
+    <string name="has_subtitles">Has Subtitles</string>">
+    <string name="is_ascending">Ascending</string>
+    <string name="filter_created_date">Created Date</string>
+    <string name="filter_release_date">Release Date</string>
+    <string name="filter_id">Id</string>
+    <string name="filter_rating">Rating</string>
+    <string name="filter_random">Random</string>
+    <string name="filter_review_count">Review Count</string>
 </resources>

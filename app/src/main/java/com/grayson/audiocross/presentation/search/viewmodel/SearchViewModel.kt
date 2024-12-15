@@ -10,7 +10,7 @@ import com.grayson.audiocross.domain.common.io
 import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
 import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
-import com.grayson.audiocross.presentation.search.model.SearchFilterParam
+import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
 import com.grayson.audiocross.presentation.search.model.toRequestParam
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,14 +81,19 @@ class SearchViewModel : ViewModel() {
      * request filter param (not include page).
      */
     private val _filterParam = MutableStateFlow(
-        SearchFilterParam(
+        AlbumListFilterParam(
             orderBy = OrderBy.CREATED_DATE,
             sortMethod = SortMethod.DESCENDING,
-            hasSubtitle = true,
-            keywords = ""
+            hasSubtitle = false
         )
     )
-    val filterParam: StateFlow<SearchFilterParam> = _filterParam
+    val filterParam: StateFlow<AlbumListFilterParam> = _filterParam
+
+    /**
+     * search keywords
+     */
+    private val _keywords = MutableStateFlow("")
+    val keywords: StateFlow<String> = _keywords
 
     // endregion
 
@@ -96,11 +101,17 @@ class SearchViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            _filterParam
+            _keywords
                 .debounce(SEARCH_DEBOUNCE_TIME)
-                .distinctUntilChanged().collect { param ->
+                .distinctUntilChanged()
+                .collect {
                     refreshAlbumList()
                 }
+        }
+        viewModelScope.launch {
+            _filterParam.collect { param ->
+                refreshAlbumList()
+            }
         }
     }
 
@@ -116,7 +127,7 @@ class SearchViewModel : ViewModel() {
             Log.i(TAG, "refreshAlbumList: start")
             val result = io {
                 useCaseSet.searchAlbumListUseCase.fetch(
-                    param = filterParam.value.toRequestParam(page = 1)
+                    param = filterParam.value.toRequestParam(page = 1, keywords = keywords.value)
                 )
             }
             when (result) {
@@ -139,8 +150,14 @@ class SearchViewModel : ViewModel() {
     }
 
     fun updateKeywords(keywords: String) {
+        _keywords.update {
+            keywords
+        }
+    }
+
+    fun updateFilterParam(param: AlbumListFilterParam) {
         _filterParam.update {
-            it.copy(keywords = keywords)
+            param
         }
     }
 
@@ -150,7 +167,7 @@ class SearchViewModel : ViewModel() {
             Log.i(TAG, "loadMoreAlbumList: start")
             val result = io {
                 useCaseSet.searchAlbumListUseCase.fetch(
-                    param = filterParam.value.toRequestParam(page + 1)
+                    param = filterParam.value.toRequestParam(page + 1, keywords.value)
                 )
             }
             when (result) {

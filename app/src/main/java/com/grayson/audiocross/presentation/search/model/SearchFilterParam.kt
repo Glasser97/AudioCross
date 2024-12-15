@@ -1,20 +1,12 @@
 package com.grayson.audiocross.presentation.search.model
 
-import com.grayson.audiocross.domain.albumlist.base.OrderBy
-import com.grayson.audiocross.domain.albumlist.base.SortMethod
 import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
+import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
 
-data class SearchFilterParam(
-    val orderBy: OrderBy,
-    val sortMethod: SortMethod,
-    val hasSubtitle: Boolean,
-    val keywords: String? = null
-)
-
-fun SearchFilterParam.toRequestParam(page: Int) = SearchAlbumListUseCase.Param(
+fun AlbumListFilterParam.toRequestParam(page: Int, keywords: String? = null) = SearchAlbumListUseCase.Param(
     this.orderBy,
     this.sortMethod,
     page,
     this.hasSubtitle,
-    this.keywords
+    keywords
 )

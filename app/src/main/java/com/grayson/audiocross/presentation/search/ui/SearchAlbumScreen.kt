@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,21 +29,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.R
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
+import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCard
-import com.grayson.audiocross.presentation.search.model.SearchFilterParam
+import com.grayson.audiocross.presentation.search.model.FilterUIItem
 import com.grayson.audiocross.presentation.search.viewmodel.SearchViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 
@@ -58,16 +67,19 @@ fun SearchScreen(
     val isLoadingMore by searchViewModel.isLoadingMore.collectAsStateWithLifecycle()
     val albumCardDisplayItems: List<AlbumCardDisplayItem> by searchViewModel.albumList.collectAsStateWithLifecycle()
     val filterParam by searchViewModel.filterParam.collectAsStateWithLifecycle()
+    val searchKeywords by searchViewModel.keywords.collectAsStateWithLifecycle()
 
     SearchScreenViewModeless(
         modifier = modifier,
         navigatorToPlayer = navigatorToDetail,
         albumCardDisplayItems = albumCardDisplayItems,
         filterParam = filterParam,
+        searchKeywords = searchKeywords,
         isRefreshing = isRefreshing,
         isLoadingMore = isLoadingMore,
         refreshAlbumList = { searchViewModel.refreshAlbumList() },
         loadMoreAlbumList = { searchViewModel.loadMoreAlbumList() },
+        onUpdateFilterParam = { filter -> searchViewModel.updateFilterParam(filter)},
         onSearchTextChanged = { keywords -> searchViewModel.updateKeywords(keywords)},
         onNavigateUp = onNavigateUp
     )
@@ -78,12 +90,14 @@ fun SearchScreen(
 fun SearchScreenViewModeless(
     modifier: Modifier = Modifier,
     albumCardDisplayItems: List<AlbumCardDisplayItem>,
-    filterParam: SearchFilterParam? = null,
+    filterParam: AlbumListFilterParam? = null,
+    searchKeywords: String? = null,
     isRefreshing: Boolean = false,
     isLoadingMore: Boolean = false,
     refreshAlbumList: () -> Unit = {},
     loadMoreAlbumList: () -> Unit = {},
     onSearchTextChanged: (String) -> Unit = {},
+    onUpdateFilterParam: (AlbumListFilterParam) -> Unit = {},
     navigatorToPlayer: (AlbumCardDisplayItem) -> Unit = {},
     onNavigateUp: () -> Unit = {}
 ) {
@@ -93,10 +107,24 @@ fun SearchScreenViewModeless(
     Scaffold(
         modifier = modifier, topBar = {
             SearchTopBar(
-                searchKeyWords = filterParam?.keywords ?: "",
+                searchKeyWords = searchKeywords ?: "",
                 onSearchTextChanged = onSearchTextChanged,
                 onClickSearch = {
                     refreshAlbumList()
+                },
+                filterWindow = { isPopupVisible, iconPosition, onDismissRequest ->
+                    if (filterParam != null) {
+                        DropdownMenu(
+                            expanded = isPopupVisible,
+                            onDismissRequest = onDismissRequest,
+                            offset = DpOffset(iconPosition.x.dp, 0.dp)
+                        ) {
+                            FilterWindow(modifier = Modifier,
+                                filterParam = filterParam,
+                                filterUIItems = FilterUIItem.filterUIItems,
+                                onUpdateFilterParam = onUpdateFilterParam)
+                        }
+                    }
                 },
                 onNavigateUp = onNavigateUp
             )
@@ -128,16 +156,19 @@ fun SearchScreenViewModeless(
 
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchTopBar(
     modifier: Modifier = Modifier,
     searchKeyWords: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClickSearch: () -> Unit = {},
+    filterWindow: @Composable (Boolean, IntOffset, () -> Unit) -> Unit = {_, _, _ ->},
     onNavigateUp: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    var isPopupVisible by remember { mutableStateOf(false) }
+    var iconPosition by remember { mutableStateOf(IntOffset.Zero) }
 
     Row(
         modifier = modifier
@@ -176,7 +207,7 @@ fun SearchTopBar(
                     singleLine = true,
                     visualTransformation = VisualTransformation.None,
                     interactionSource = interactionSource,
-                    contentPadding = PaddingValues(0.dp),
+                    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 4.dp),
                 )
             },
             singleLine = true
@@ -193,6 +224,24 @@ fun SearchTopBar(
                 tint = MaterialTheme.colorScheme.primary
             )
         }
+
+        IconButton(
+            modifier = modifier
+                .height(45.dp)
+                .onGloballyPositioned {
+                    iconPosition = it.localToWindow(Offset.Zero).round()
+                },
+            onClick = {
+                isPopupVisible = true
+            }
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.icon_filter_list_24),
+                contentDescription = "Filter Content",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        filterWindow(isPopupVisible, iconPosition) { isPopupVisible = false }
     }
 }
 

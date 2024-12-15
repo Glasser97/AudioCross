@@ -77,8 +77,10 @@ fun AlbumCard(
                 ) {
                     Text(
                         text = albumCardDisplayItem.voiceAuthor,
+                        modifier = Modifier.weight(1f),
                         maxLines = 1,
                         minLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
