@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,7 +52,6 @@ import com.grayson.audiocross.domain.player.hasNext
 import com.grayson.audiocross.domain.player.hasPrevious
 import com.grayson.audiocross.presentation.albumlist.mapper.transformToTimeString
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCoverImage
-import com.grayson.audiocross.presentation.navigator.ui.BackTopBar
 import com.grayson.audiocross.presentation.player.viewmodel.PlayerViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 
