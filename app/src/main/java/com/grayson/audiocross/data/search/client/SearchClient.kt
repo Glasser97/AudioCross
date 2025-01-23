@@ -29,7 +29,7 @@ class SearchWorksRequest(
     val hasSubtitle: Boolean,
     keywords: String? = null
 ) : HttpRequestApi(httpMethod = HttpMethod.Get,
-    urlPath = GlobalProperties.AudioCrossApi.Path.SearchWorks + "/$keywords",
+    urlPath = GlobalProperties.AudioCrossApi.Path.SearchWorks + " $keywords",
     urlParams = HashMap<String, String>().also { map ->
         map["order"] = orderBy.key
         map["sort"] = sortMethod.key

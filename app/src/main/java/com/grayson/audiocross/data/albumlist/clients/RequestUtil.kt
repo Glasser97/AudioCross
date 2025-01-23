@@ -32,6 +32,8 @@ import java.net.Proxy
 
 object RequestUtil {
 
+    private const val TAG = "RequestUtil"
+
     fun getHttpClient(
         requestProxy: Proxy = GlobalProperties.Config.GlobalProxy,
         authToken: String? = null
@@ -66,6 +68,7 @@ object RequestUtil {
         httpRequestApi: HttpRequestApi
     ): HttpResponse? {
         return try {
+            Log.d(TAG, "request: ${httpRequestApi.urlPath} success")
             httpClient.request {
                 method = httpRequestApi.httpMethod
                 url {
@@ -91,7 +94,7 @@ object RequestUtil {
                 }
             }
         } catch (e: Exception) {
-            Log.e("RequestUtil", "request: ${httpRequestApi.urlPath} failed", e)
+            Log.e(TAG, "request: ${httpRequestApi.urlPath} failed", e)
             null
         }
     }
