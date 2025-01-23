@@ -20,6 +20,7 @@ exoplayer = "1.4.1"
 media3Session = "1.4.1"
 appcompat = "1.7.0"
 material = "1.12.0"
+paging = "3.3.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,6 +64,8 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3Session" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

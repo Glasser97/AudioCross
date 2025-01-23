@@ -34,8 +34,7 @@ import kotlin.reflect.KProperty
  * It expose the current state of the MediaSessionService as state flows so UI can update accordingly
  */
 class ExoAudioPlayer(
-    private val context: Context,
-    private val mainDispatcher: CoroutineDispatcher
+    private val context: Context
 ) : IAudioPlayer {
 
     // region constant
@@ -49,8 +48,6 @@ class ExoAudioPlayer(
     // region field
 
     private val _playerState = MutableStateFlow(PlayerState.Empty)
-
-    private val coroutineScope = CoroutineScope(mainDispatcher)
 
     override val playerState: StateFlow<PlayerState> = _playerState
 
@@ -76,10 +73,6 @@ class ExoAudioPlayer(
         }
 
     // endregion
-
-    // endregion
-
-    // region init
 
     // endregion
 
@@ -272,6 +265,8 @@ class ExoAudioPlayer(
     // endregion
 }
 
+// region mapper
+
 fun WorkItem.toBundle(): Bundle = Bundle().also {
     it.putLong("id", this.id)
     it.putString("sourceId", this.sourceId)
@@ -323,7 +318,10 @@ fun MediaItem.toAudio(): TrackItem.Audio? {
     )
 }
 
-// Used to enable property delegation
+// endregion
+
+// region endregion
+
 private operator fun <T> MutableStateFlow<T>.setValue(
     thisObj: Any?,
     property: KProperty<*>,

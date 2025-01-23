@@ -3,6 +3,9 @@ package com.grayson.audiocross.presentation.albumlist.mapper
 import com.grayson.audiocross.domain.albumlist.model.AlbumItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 
+/**
+ * @param needSrcImage true if need src image, false if need medium image
+ */
 fun AlbumItem.mapToDisplayItem(
     needSrcImage: Boolean = false
 ): AlbumCardDisplayItem {

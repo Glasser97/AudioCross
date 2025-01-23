@@ -119,8 +119,6 @@ class SearchViewModel : ViewModel() {
 
     // region public
 
-    // region public
-
     fun refreshAlbumList() {
         viewModelScope.launch {
             _isRefreshing.update { true }

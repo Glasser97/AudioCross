@@ -21,6 +21,7 @@ import com.grayson.audiocross.domain.player.IAudioPlayer
 import com.grayson.audiocross.domain.search.repository.ISearchAlbumRepository
 import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
+import com.grayson.audiocross.presentation.albumlist.viewmodel.AlbumListViewModel
 import com.grayson.audiocross.presentation.player.ExoAudioPlayer
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
@@ -58,8 +59,7 @@ class AudioCrossApplication : Application() {
             }
             single<IAudioPlayer> {
                 ExoAudioPlayer(
-                    this@AudioCrossApplication.applicationContext,
-                    Dispatchers.Main
+                    this@AudioCrossApplication.applicationContext
                 )
             }
             factory {
@@ -86,6 +86,12 @@ class AudioCrossApplication : Application() {
                     albumId = parameters.get()
                 )
             }
+
+            viewModel {
+                AlbumListViewModel()
+            }
+
+
         }
 
         startKoin {

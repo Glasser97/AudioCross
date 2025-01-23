@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -31,6 +30,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.grayson.audiocross.R
 import com.grayson.audiocross.domain.login.model.User
 import com.grayson.audiocross.domain.login.model.isLogin
@@ -39,17 +41,16 @@ import com.grayson.audiocross.presentation.albumlist.viewmodel.AlbumListViewMode
 import com.grayson.audiocross.presentation.navigator.viewmodel.AudioCrossViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlbumCardListScreenViewModeless(
     modifier: Modifier = Modifier,
-    albumCardDisplayItems: List<AlbumCardDisplayItem>,
+    albumCardDisplayItems: LazyPagingItems<AlbumCardDisplayItem>,
     userInfo: User? = null,
     isRefreshing: Boolean = false,
-    isLoadingMore: Boolean = false,
     refreshAlbumList: () -> Unit = {},
-    loadMoreAlbumList: () -> Unit = {},
     navigatorToPlayer: (AlbumCardDisplayItem) -> Unit = {},
     navigatorToSearch: () -> Unit = {},
     navigatorToLogin: () -> Unit = {},
@@ -94,13 +95,36 @@ fun AlbumCardListScreenViewModeless(
                     .padding(padding)
             ) {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(albumCardDisplayItems,
-                        key = { _, item -> item.albumId }) { index, albumItem ->
-                        AlbumCard(
-                            albumCardDisplayItem = albumItem,
-                            onClick = { navigatorToPlayer(it) })
-                        if (index >= albumCardDisplayItems.size - 2 && !isLoadingMore) {
-                            loadMoreAlbumList()
+                    items(albumCardDisplayItems.itemCount,
+                        key = { index ->
+                            albumCardDisplayItems[index]?.albumId ?: -1L
+                        }) { index ->
+                        albumCardDisplayItems[index]?.let {
+                            AlbumCard(
+                                albumCardDisplayItem = it,
+                                onClick = { navigatorToPlayer(it) })
+                        }
+                    }
+
+                    // Footer
+                    albumCardDisplayItems.apply {
+                        when (loadState.append) {
+                            is LoadState.Loading -> {
+                                item {
+                                    LoadMoreFooter()
+                                }
+                            }
+
+                            is LoadState.Error -> {
+                                item {
+                                    LoadMoreFooter(
+                                        needRetry = true,
+                                        retry = { retry() }
+                                    )
+                                }
+                            }
+
+                            else -> Unit
                         }
                     }
                 }
@@ -123,23 +147,19 @@ fun AlbumCardListScreen(
     navigatorToDetail: (AlbumCardDisplayItem) -> Unit = {},
     navigatorToSearch: () -> Unit = {},
     navigatorToLogin: () -> Unit,
-    listViewModel: AlbumListViewModel = viewModel(),
+    listViewModel: AlbumListViewModel = koinViewModel<AlbumListViewModel>(),
     mainViewModel: AudioCrossViewModel = viewModel()
 ) {
-    val isRefreshing by listViewModel.isRefreshing.collectAsStateWithLifecycle()
-    val isLoadingMore by listViewModel.isLoadingMore.collectAsStateWithLifecycle()
-    val albumCardDisplayItems: List<AlbumCardDisplayItem> by listViewModel.albumList.collectAsStateWithLifecycle()
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
-    val filterParam by listViewModel.filterParam.collectAsStateWithLifecycle()
+    val pagingItems = listViewModel.pagingDataFlow.collectAsLazyPagingItems()
+    val isRefreshing = pagingItems.loadState.refresh == LoadState.Loading
     AlbumCardListScreenViewModeless(
         modifier = modifier,
         navigatorToPlayer = navigatorToDetail,
-        albumCardDisplayItems = albumCardDisplayItems,
+        albumCardDisplayItems = pagingItems,
         userInfo = uiState.user,
         isRefreshing = isRefreshing,
-        isLoadingMore = isLoadingMore,
-        refreshAlbumList = { listViewModel.refreshAlbumList() },
-        loadMoreAlbumList = { listViewModel.loadMoreAlbumList() },
+        refreshAlbumList = { pagingItems.refresh() },
         navigatorToSearch = navigatorToSearch,
         navigatorToLogin = navigatorToLogin,
         onLogout = {
@@ -193,24 +213,17 @@ private fun AlbumListTopBarPreview() {
     }
 }
 
-@Composable
-@Preview
-fun AlbumCardListPreview() {
-    AudioCrossTheme {
-        AlbumCardListScreenViewModeless(
-            albumCardDisplayItems = listOf(
-                AlbumCardDisplayItem(
-                    101L,
-                    "RJ101", "Title", "Voice Author", "CoverUrl", "2:00:00"
-                ), AlbumCardDisplayItem(
-                    102L,
-                    "RJ102",
-                    "Title is too long, Title is too long, Title is too long, Title is too long, " + "Title is too long, Title is too long, Title is too long, ",
-                    "Voice Author",
-                    "CoverUrl",
-                    "2:00:00"
-                )
-            )
-        )
-    }
-}
+//@Composable
+//@Preview
+//fun AlbumCardListPreview() {
+//    AudioCrossTheme {
+//        AlbumCardListScreenViewModeless(
+//            albumCardDisplayItems = Pager(
+//                config = PagingConfig(pageSize = 10),
+//                pagingSourceFactory = {
+//                    object : PagingSource<>
+//                }
+//            )
+//        )
+//    }
+//}
