@@ -16,8 +16,10 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -101,17 +103,13 @@ class SearchViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            _keywords
+            combine(keywords, filterParam) { keywords, filterParam ->
+                Pair(keywords, filterParam)
+            }.drop(1)
                 .debounce(SEARCH_DEBOUNCE_TIME)
-                .distinctUntilChanged()
-                .collect {
+                .distinctUntilChanged().collect {
                     refreshAlbumList()
                 }
-        }
-        viewModelScope.launch {
-            _filterParam.collect { param ->
-                refreshAlbumList()
-            }
         }
     }
 
@@ -132,7 +130,7 @@ class SearchViewModel : ViewModel() {
                 is RequestResult.Success -> {
                     _albumList.update {
                         result.data.albumItems.map {
-                            it.mapToDisplayItem()
+                            it.mapToDisplayItem(true)
                         }
                     }
                     page = result.data.currentPage
