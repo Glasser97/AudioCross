@@ -27,8 +27,6 @@ class AlbumListViewModel : ViewModel() {
 
     companion object {
         private const val TAG = "AlbumListViewModel"
-
-        private const val PAGE_SIZE = 10
     }
 
     // endregion

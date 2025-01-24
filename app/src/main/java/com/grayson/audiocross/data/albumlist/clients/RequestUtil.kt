@@ -105,7 +105,7 @@ object RequestUtil {
         return@runBlocking try {
             RequestResult.Success(body<T>())
         } catch (e: JsonConvertException) {
-            RequestResult.Error(RequestNotOkException(body()))
+            RequestResult.Error(RequestNotOkException(CommonError(e.message ?: "Json parser failed")))
         }
     }
 }

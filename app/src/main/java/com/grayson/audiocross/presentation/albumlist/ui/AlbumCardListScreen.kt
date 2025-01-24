@@ -29,7 +29,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -56,9 +55,6 @@ fun AlbumCardListScreenViewModeless(
     navigatorToLogin: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
-    val pullRefreshState = rememberPullRefreshState(isRefreshing, {
-        refreshAlbumList()
-    })
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -89,42 +85,28 @@ fun AlbumCardListScreenViewModeless(
                 )
             }, containerColor = MaterialTheme.colorScheme.surface
         ) { padding ->
+
+            val pullRefreshState = rememberPullRefreshState(isRefreshing, {
+                refreshAlbumList()
+            })
             Box(
-                Modifier
+                modifier
                     .pullRefresh(pullRefreshState)
                     .padding(padding)
             ) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(albumCardDisplayItems.itemCount,
-                        key = { index ->
-                            albumCardDisplayItems[index]?.albumId ?: -1L
-                        }) { index ->
-                        albumCardDisplayItems[index]?.let {
-                            AlbumCard(
-                                albumCardDisplayItem = it,
-                                onClick = { navigatorToPlayer(it) })
-                        }
+                when (albumCardDisplayItems.loadState.refresh) {
+                    is LoadState.Error -> {
+                        FailedScreen(onRetry = { refreshAlbumList() })
                     }
 
-                    // Footer
-                    albumCardDisplayItems.apply {
-                        when (loadState.append) {
-                            is LoadState.Loading -> {
-                                item {
-                                    LoadMoreFooter()
-                                }
-                            }
-
-                            is LoadState.Error -> {
-                                item {
-                                    LoadMoreFooter(
-                                        needRetry = true,
-                                        retry = { retry() }
-                                    )
-                                }
-                            }
-
-                            else -> Unit
+                    is LoadState.Loading, is LoadState.NotLoading -> {
+                        if (albumCardDisplayItems.itemCount == 0 && albumCardDisplayItems.loadState.refresh is LoadState.NotLoading) {
+                            EmptyScreen()
+                        } else {
+                            AlbumListColumn(
+                                albumCardDisplayItems = albumCardDisplayItems,
+                                navigatorToPlayer = navigatorToPlayer
+                            )
                         }
                     }
                 }
@@ -138,6 +120,50 @@ fun AlbumCardListScreenViewModeless(
     }
 }
 
+@Composable
+fun AlbumListColumn(
+    modifier: Modifier = Modifier,
+    albumCardDisplayItems: LazyPagingItems<AlbumCardDisplayItem>,
+    navigatorToPlayer: (AlbumCardDisplayItem) -> Unit = {},
+) {
+
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        items(albumCardDisplayItems.itemCount,
+            key = { index ->
+                albumCardDisplayItems[index]?.albumId ?: -1L
+            }) { index ->
+            albumCardDisplayItems[index]?.let {
+                AlbumCard(
+                    albumCardDisplayItem = it,
+                    onClick = { navigatorToPlayer(it) })
+            }
+        }
+
+        // Footer
+        albumCardDisplayItems.apply {
+            when (loadState.append) {
+                is LoadState.Loading -> {
+                    item {
+                        LoadMoreFooter()
+                    }
+                }
+
+                is LoadState.Error -> {
+                    item {
+                        LoadMoreFooter(
+                            needRetry = true,
+                            retry = { retry() }
+                        )
+                    }
+                }
+
+                else -> Unit
+            }
+        }
+    }
+}
+
+
 /**
  * Album Card List
  */
@@ -148,7 +174,7 @@ fun AlbumCardListScreen(
     navigatorToSearch: () -> Unit = {},
     navigatorToLogin: () -> Unit,
     listViewModel: AlbumListViewModel = koinViewModel<AlbumListViewModel>(),
-    mainViewModel: AudioCrossViewModel = viewModel()
+    mainViewModel: AudioCrossViewModel = koinViewModel<AudioCrossViewModel>()
 ) {
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val pagingItems = listViewModel.pagingDataFlow.collectAsLazyPagingItems()
@@ -212,18 +238,3 @@ private fun AlbumListTopBarPreview() {
         )
     }
 }
-
-//@Composable
-//@Preview
-//fun AlbumCardListPreview() {
-//    AudioCrossTheme {
-//        AlbumCardListScreenViewModeless(
-//            albumCardDisplayItems = Pager(
-//                config = PagingConfig(pageSize = 10),
-//                pagingSourceFactory = {
-//                    object : PagingSource<>
-//                }
-//            )
-//        )
-//    }
-//}

@@ -22,8 +22,8 @@ import com.grayson.audiocross.domain.search.repository.ISearchAlbumRepository
 import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
 import com.grayson.audiocross.presentation.albumlist.viewmodel.AlbumListViewModel
+import com.grayson.audiocross.presentation.navigator.viewmodel.AudioCrossViewModel
 import com.grayson.audiocross.presentation.player.ExoAudioPlayer
-import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
@@ -89,6 +89,10 @@ class AudioCrossApplication : Application() {
 
             viewModel {
                 AlbumListViewModel()
+            }
+
+            viewModel {
+                AudioCrossViewModel()
             }
 
 
