@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.TextFieldDefaults
@@ -28,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +53,12 @@ import com.grayson.audiocross.R
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCard
+import com.grayson.audiocross.presentation.albumlist.ui.EmptyScreen
+import com.grayson.audiocross.presentation.albumlist.ui.FailedScreen
+import com.grayson.audiocross.presentation.albumlist.ui.LoadMoreFooter
 import com.grayson.audiocross.presentation.search.model.FilterUIItem
+import com.grayson.audiocross.presentation.search.model.ListState
+import com.grayson.audiocross.presentation.search.model.UiState
 import com.grayson.audiocross.presentation.search.viewmodel.SearchViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 
@@ -62,12 +69,10 @@ fun SearchScreen(
     onNavigateUp: () -> Unit = {},
     searchViewModel: SearchViewModel = viewModel()
 ) {
-
-    val isRefreshing by searchViewModel.isRefreshing.collectAsStateWithLifecycle()
-    val isLoadingMore by searchViewModel.isLoadingMore.collectAsStateWithLifecycle()
     val albumCardDisplayItems: List<AlbumCardDisplayItem> by searchViewModel.albumList.collectAsStateWithLifecycle()
     val filterParam by searchViewModel.filterParam.collectAsStateWithLifecycle()
     val searchKeywords by searchViewModel.keywords.collectAsStateWithLifecycle()
+    val listState by searchViewModel.listState.collectAsStateWithLifecycle()
 
     SearchScreenViewModeless(
         modifier = modifier,
@@ -75,12 +80,11 @@ fun SearchScreen(
         albumCardDisplayItems = albumCardDisplayItems,
         filterParam = filterParam,
         searchKeywords = searchKeywords,
-        isRefreshing = isRefreshing,
-        isLoadingMore = isLoadingMore,
+        listState = listState,
         refreshAlbumList = { searchViewModel.refreshAlbumList() },
         loadMoreAlbumList = { searchViewModel.loadMoreAlbumList() },
-        onUpdateFilterParam = { filter -> searchViewModel.updateFilterParam(filter)},
-        onSearchTextChanged = { keywords -> searchViewModel.updateKeywords(keywords)},
+        onUpdateFilterParam = { filter -> searchViewModel.updateFilterParam(filter) },
+        onSearchTextChanged = { keywords -> searchViewModel.updateKeywords(keywords) },
         onNavigateUp = onNavigateUp
     )
 }
@@ -92,8 +96,7 @@ fun SearchScreenViewModeless(
     albumCardDisplayItems: List<AlbumCardDisplayItem>,
     filterParam: AlbumListFilterParam? = null,
     searchKeywords: String? = null,
-    isRefreshing: Boolean = false,
-    isLoadingMore: Boolean = false,
+    listState: ListState? = null,
     refreshAlbumList: () -> Unit = {},
     loadMoreAlbumList: () -> Unit = {},
     onSearchTextChanged: (String) -> Unit = {},
@@ -101,9 +104,19 @@ fun SearchScreenViewModeless(
     navigatorToPlayer: (AlbumCardDisplayItem) -> Unit = {},
     onNavigateUp: () -> Unit = {}
 ) {
+    val isRefreshing = listState?.refreshState is UiState.Loading
+    val canLoadMore =
+        listState?.loadMoreState is UiState.Success || listState?.loadMoreState is UiState.Init
     val pullRefreshState = rememberPullRefreshState(isRefreshing, {
         refreshAlbumList()
     })
+    val lazyListState = rememberLazyListState()
+    LaunchedEffect(filterParam, searchKeywords) {
+        if (albumCardDisplayItems.isNotEmpty()) {
+            lazyListState.scrollToItem(0)
+        }
+    }
+
     Scaffold(
         modifier = modifier, topBar = {
             SearchTopBar(
@@ -119,10 +132,12 @@ fun SearchScreenViewModeless(
                             onDismissRequest = onDismissRequest,
                             offset = DpOffset(iconPosition.x.dp, 0.dp)
                         ) {
-                            FilterWindow(modifier = Modifier,
+                            FilterWindow(
+                                modifier = Modifier,
                                 filterParam = filterParam,
                                 filterUIItems = FilterUIItem.filterUIItems,
-                                onUpdateFilterParam = onUpdateFilterParam)
+                                onUpdateFilterParam = onUpdateFilterParam
+                            )
                         }
                     }
                 },
@@ -135,22 +150,55 @@ fun SearchScreenViewModeless(
                 .pullRefresh(pullRefreshState)
                 .padding(padding)
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                itemsIndexed(albumCardDisplayItems,
-                    key = { _, item -> item.albumId }) { index, albumItem ->
-                    AlbumCard(
-                        albumCardDisplayItem = albumItem,
-                        onClick = { navigatorToPlayer(it) })
-                    if (index >= albumCardDisplayItems.size - 2 && !isLoadingMore) {
-                        loadMoreAlbumList()
+            when (listState?.refreshState) {
+                is UiState.Error -> {
+                    FailedScreen(
+                        onRetry = { refreshAlbumList() }
+                    )
+                }
+
+                else -> {
+                    if (albumCardDisplayItems.isEmpty() && !isRefreshing) {
+                        EmptyScreen()
+                        return@Box
                     }
+                    LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
+                        itemsIndexed(albumCardDisplayItems,
+                            key = { _, item -> item.albumId }) { index, albumItem ->
+                            AlbumCard(
+                                albumCardDisplayItem = albumItem,
+                                onClick = { navigatorToPlayer(it) })
+                            if (index >= albumCardDisplayItems.size - 2 && canLoadMore) {
+                                loadMoreAlbumList()
+                            }
+                        }
+
+                        when (listState?.loadMoreState) {
+                            is UiState.Error -> {
+                                item {
+                                    LoadMoreFooter(
+                                        needRetry = true,
+                                        retry = { loadMoreAlbumList() }
+                                    )
+                                }
+                            }
+
+                            is UiState.Loading -> {
+                                item {
+                                    LoadMoreFooter()
+                                }
+                            }
+
+                            else -> {}
+                        }
+                    }
+                    PullRefreshIndicator(
+                        refreshing = isRefreshing, state = pullRefreshState, Modifier.align(
+                            Alignment.TopCenter
+                        )
+                    )
                 }
             }
-            PullRefreshIndicator(
-                refreshing = isRefreshing, state = pullRefreshState, Modifier.align(
-                    Alignment.TopCenter
-                )
-            )
         }
     }
 
@@ -163,7 +211,7 @@ fun SearchTopBar(
     searchKeyWords: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClickSearch: () -> Unit = {},
-    filterWindow: @Composable (Boolean, IntOffset, () -> Unit) -> Unit = {_, _, _ ->},
+    filterWindow: @Composable (Boolean, IntOffset, () -> Unit) -> Unit = { _, _, _ -> },
     onNavigateUp: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -229,7 +277,9 @@ fun SearchTopBar(
             modifier = modifier
                 .height(45.dp)
                 .onGloballyPositioned {
-                    iconPosition = it.localToWindow(Offset.Zero).round()
+                    iconPosition = it
+                        .localToWindow(Offset.Zero)
+                        .round()
                 },
             onClick = {
                 isPopupVisible = true
@@ -260,7 +310,7 @@ private fun SearchTopBarPreview() {
 fun SearchScreenPreview() {
     AudioCrossTheme {
         SearchScreenViewModeless(
-             albumCardDisplayItems = listOf(
+            albumCardDisplayItems = listOf(
                 AlbumCardDisplayItem(
                     101L,
                     "RJ101", "Title", "Voice Author", "CoverUrl", "2:00:00"

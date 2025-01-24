@@ -2,10 +2,9 @@ package com.grayson.audiocross.data.search.repository
 
 import com.grayson.audiocross.data.albumlist.base.OrderBy
 import com.grayson.audiocross.data.albumlist.base.SortMethod
+import com.grayson.audiocross.data.albumlist.mapper.mapToDomain
 import com.grayson.audiocross.data.search.client.SearchClient
 import com.grayson.audiocross.data.search.client.SearchWorksRequest
-import com.grayson.audiocross.domain.albumlist.model.AlbumCover
-import com.grayson.audiocross.domain.albumlist.model.AlbumItem
 import com.grayson.audiocross.domain.albumlist.model.FetchAlbumListResult
 import com.grayson.audiocross.domain.common.RequestResult
 import com.grayson.audiocross.domain.search.repository.ISearchAlbumRepository
@@ -25,18 +24,7 @@ class SearchAlbumRepository : ISearchAlbumRepository {
         return when (dataResult) {
             is RequestResult.Success -> {
                 val works = dataResult.data.works.map { workInfo ->
-                    AlbumItem(
-                        albumId = workInfo.id,
-                        title = workInfo.title,
-                        albumCode = workInfo.sourceId,
-                        authorName = workInfo.vases.map { vas -> vas.name },
-                        cover = AlbumCover(
-                            mainCoverUrl = workInfo.mainCoverUrl,
-                            mediumCoverUrl = workInfo.samCoverUrl,
-                            thumbnailCoverUrl = workInfo.thumbnailCoverUrl
-                        ),
-                        duration = workInfo.duration
-                    )
+                    workInfo.mapToDomain()
                 }
                 RequestResult.Success(
                     FetchAlbumListResult(

@@ -6,7 +6,7 @@ import com.grayson.audiocross.data.albumlist.base.OrderBy
 import com.grayson.audiocross.data.albumlist.base.SortMethod
 import com.grayson.audiocross.data.albumlist.clients.GetWorksRequest
 import com.grayson.audiocross.data.albumlist.clients.WorkClient
-import com.grayson.audiocross.domain.albumlist.model.AlbumCover
+import com.grayson.audiocross.data.albumlist.mapper.mapToDomain
 import com.grayson.audiocross.domain.albumlist.model.AlbumItem
 import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 import com.grayson.audiocross.domain.common.RequestResult
@@ -32,18 +32,7 @@ class AlbumListPageSource(private val initParam: FetchAlbumListUseCase.Param) :
             when (dataResult) {
                 is RequestResult.Success -> {
                     val works = dataResult.data.works.map { workInfo ->
-                        AlbumItem(
-                            albumId = workInfo.id,
-                            title = workInfo.title,
-                            albumCode = workInfo.sourceId,
-                            authorName = workInfo.vases.map { vas -> vas.name },
-                            cover = AlbumCover(
-                                mainCoverUrl = workInfo.mainCoverUrl,
-                                mediumCoverUrl = workInfo.samCoverUrl,
-                                thumbnailCoverUrl = workInfo.thumbnailCoverUrl
-                            ),
-                            duration = workInfo.duration
-                        )
+                        workInfo.mapToDomain()
                     }
                     LoadResult.Page(
                         data = works,

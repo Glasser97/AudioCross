@@ -37,6 +37,5 @@ class SearchWorksRequest(
         if (orderBy == OrderBy.NO_NSFW) {
             map["label"] = "works.sfwOnly"
         }
-        map["includeTranslationWorks"] = "true"
         map["subtitle"] = if (hasSubtitle) "1" else "0"
     })

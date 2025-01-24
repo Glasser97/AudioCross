@@ -11,6 +11,7 @@
     <string name="cd_pause">pause this audio</string>
     <string name="cd_play">play this audio\n</string>
     <string name="loading">Loading…</string>
+    <string name="retry">Retry</string>
     <string name="load_more_retry">load more failed, click to retry</string>
     <string name="cd_forward10">forward 10 seconds</string>
     <string name="cd_skip_next">skip next</string>
@@ -23,4 +24,6 @@
     <string name="filter_rating">Rating</string>
     <string name="filter_random">Random</string>
     <string name="filter_review_count">Review Count</string>
+    <string name="empty_list">No Data</string>"
+    <string name="loading_failed">Loading Failed</string>
 </resources>

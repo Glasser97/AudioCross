@@ -11,8 +11,11 @@ import com.grayson.audiocross.domain.search.usecase.SearchAlbumListUseCase
 import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
+import com.grayson.audiocross.presentation.search.model.ListState
+import com.grayson.audiocross.presentation.search.model.UiState
 import com.grayson.audiocross.presentation.search.model.toRequestParam
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -59,34 +62,17 @@ class SearchViewModel : ViewModel() {
      * album list
      */
     private val _albumList = MutableStateFlow<List<AlbumCardDisplayItem>>(emptyList())
-    val albumList: StateFlow<List<AlbumCardDisplayItem>> = _albumList
-        .onStart { refreshAlbumList() }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = emptyList()
+    val albumList: StateFlow<List<AlbumCardDisplayItem>> =
+        _albumList.onStart { refreshAlbumList() }.stateIn(
+            viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList()
         )
-
-    /**
-     * is Refreshing
-     */
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing
-
-    /**
-     * loadMore State
-     */
-    private val _isLoadingMore = MutableStateFlow(false)
-    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore
 
     /**
      * request filter param (not include page).
      */
     private val _filterParam = MutableStateFlow(
         AlbumListFilterParam(
-            orderBy = OrderBy.CREATED_DATE,
-            sortMethod = SortMethod.DESCENDING,
-            hasSubtitle = false
+            orderBy = OrderBy.CREATED_DATE, sortMethod = SortMethod.DESCENDING, hasSubtitle = false
         )
     )
     val filterParam: StateFlow<AlbumListFilterParam> = _filterParam
@@ -97,6 +83,30 @@ class SearchViewModel : ViewModel() {
     private val _keywords = MutableStateFlow("")
     val keywords: StateFlow<String> = _keywords
 
+    /**
+     * Page State
+     */
+    private val _listState: MutableStateFlow<ListState> =
+        MutableStateFlow(
+            ListState(
+                refreshState = UiState.Init,
+                loadMoreState = UiState.Init
+            )
+        )
+    val listState: StateFlow<ListState> = _listState
+        .onStart { refreshAlbumList() }
+        .stateIn(
+            viewModelScope, started = SharingStarted.Lazily, initialValue = ListState(
+                refreshState = UiState.Init,
+                loadMoreState = UiState.Init
+            )
+        )
+
+    /**
+     * request job
+     */
+    private var requestJob: Job? = null
+
     // endregion
 
     // region init
@@ -105,11 +115,9 @@ class SearchViewModel : ViewModel() {
         viewModelScope.launch {
             combine(keywords, filterParam) { keywords, filterParam ->
                 Pair(keywords, filterParam)
-            }.drop(1)
-                .debounce(SEARCH_DEBOUNCE_TIME)
-                .distinctUntilChanged().collect {
-                    refreshAlbumList()
-                }
+            }.drop(1).debounce(SEARCH_DEBOUNCE_TIME).distinctUntilChanged().collect {
+                refreshAlbumList()
+            }
         }
     }
 
@@ -118,9 +126,10 @@ class SearchViewModel : ViewModel() {
     // region public
 
     fun refreshAlbumList() {
-        viewModelScope.launch {
-            _isRefreshing.update { true }
+        requestJob?.cancel()
+        requestJob = viewModelScope.launch {
             Log.i(TAG, "refreshAlbumList: start")
+            _listState.update { _listState.value.copy(refreshState = UiState.Loading) }
             val result = io {
                 useCaseSet.searchAlbumListUseCase.fetch(
                     param = filterParam.value.toRequestParam(page = 1, keywords = keywords.value)
@@ -128,6 +137,7 @@ class SearchViewModel : ViewModel() {
             }
             when (result) {
                 is RequestResult.Success -> {
+                    _listState.update { _listState.value.copy(refreshState = UiState.Success) }
                     _albumList.update {
                         result.data.albumItems.map {
                             it.mapToDisplayItem(true)
@@ -137,10 +147,10 @@ class SearchViewModel : ViewModel() {
                 }
 
                 is RequestResult.Error -> {
+                    _listState.update { _listState.value.copy(refreshState = UiState.Error) }
                     Log.w(TAG, "refreshAlbumList error: ${result.exception}")
                 }
             }
-            _isRefreshing.update { false }
             Log.i(TAG, "refreshAlbumList: end")
         }
     }
@@ -158,9 +168,20 @@ class SearchViewModel : ViewModel() {
     }
 
     fun loadMoreAlbumList() {
-        viewModelScope.launch {
-            _isLoadingMore.update { true }
+        if (listState.value.refreshState !is UiState.Success) {
+            Log.i(TAG, "loadMoreAlbumList: return because refreshState is not Success")
+            return
+        }
+        if (listState.value.loadMoreState is UiState.Loading) {
+            Log.i(TAG, "loadMoreAlbumList: return because pageState is loading")
+            return
+        }
+        requestJob?.cancel()
+        requestJob = viewModelScope.launch {
             Log.i(TAG, "loadMoreAlbumList: start")
+            _listState.update {
+                _listState.value.copy(loadMoreState = UiState.Loading)
+            }
             val result = io {
                 useCaseSet.searchAlbumListUseCase.fetch(
                     param = filterParam.value.toRequestParam(page + 1, keywords.value)
@@ -175,13 +196,18 @@ class SearchViewModel : ViewModel() {
                         }
                     }
                     page = result.data.currentPage
+                    _listState.update {
+                        _listState.value.copy(loadMoreState = UiState.Success)
+                    }
                 }
 
                 is RequestResult.Error -> {
+                    _listState.update {
+                        _listState.value.copy(loadMoreState = UiState.Error)
+                    }
                     Log.w(TAG, "refreshAlbumList error: ${result.exception}")
                 }
             }
-            _isLoadingMore.update { false }
             Log.i(TAG, "loadMoreAlbumList: end")
         }
     }
