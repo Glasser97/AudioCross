@@ -45,13 +45,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grayson.audiocross.R
 import com.grayson.audiocross.presentation.login.viewmodel.LoginViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.presentation.navigator.ui.BackTopBar
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = viewModel(),
+    viewModel: LoginViewModel = koinViewModel(),
     onNavigateUp: () -> Unit = {},
     onPopBackStackToMain: () -> Unit = {}
 ) {

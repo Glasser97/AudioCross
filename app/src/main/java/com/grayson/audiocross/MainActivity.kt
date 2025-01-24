@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.grayson.audiocross.domain.database.IUserInfoHelper
@@ -26,6 +25,7 @@ import com.grayson.audiocross.presentation.navigator.viewmodel.AudioCrossViewMod
 import com.grayson.audiocross.presentation.player.PlayerBarStateful
 import com.grayson.audiocross.presentation.player.viewmodel.PlayerViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
+import org.koin.androidx.compose.koinViewModel
 import org.koin.java.KoinJavaComponent.inject
 
 class MainActivity : ComponentActivity() {
@@ -43,8 +43,8 @@ class MainActivity : ComponentActivity() {
             AudioCrossTheme {
 
                 // 创建 navController
-                val mainViewModel: AudioCrossViewModel = viewModel()
-                val playerViewModel: PlayerViewModel = viewModel()
+                val mainViewModel: AudioCrossViewModel = koinViewModel()
+                val playerViewModel: PlayerViewModel = koinViewModel()
                 val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
                 val playerBarState: PlayerBarState? by playerViewModel.playerBarState.collectAsStateWithLifecycle()
                 val navController = rememberNavController()

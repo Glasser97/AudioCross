@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -77,6 +78,7 @@ fun AlbumCard(
                 ) {
                     Text(
                         text = albumCardDisplayItem.voiceAuthor,
+                        modifier = Modifier.weight(1f, fill = false),
                         maxLines = 1,
                         minLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -94,6 +96,7 @@ fun AlbumCard(
 
                     Text(
                         text = albumCardDisplayItem.duration,
+                        modifier = Modifier.wrapContentWidth(),
                         maxLines = 1,
                         minLines = 1,
                         style = MaterialTheme.typography.bodySmall,

@@ -61,13 +61,14 @@ import com.grayson.audiocross.presentation.search.model.ListState
 import com.grayson.audiocross.presentation.search.model.UiState
 import com.grayson.audiocross.presentation.search.viewmodel.SearchViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
     navigatorToDetail: (AlbumCardDisplayItem) -> Unit = {},
     onNavigateUp: () -> Unit = {},
-    searchViewModel: SearchViewModel = viewModel()
+    searchViewModel: SearchViewModel = koinViewModel()
 ) {
     val albumCardDisplayItems: List<AlbumCardDisplayItem> by searchViewModel.albumList.collectAsStateWithLifecycle()
     val filterParam by searchViewModel.filterParam.collectAsStateWithLifecycle()
