@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grayson.audiocross.R
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
@@ -74,6 +73,12 @@ fun SearchScreen(
     val filterParam by searchViewModel.filterParam.collectAsStateWithLifecycle()
     val searchKeywords by searchViewModel.keywords.collectAsStateWithLifecycle()
     val listState by searchViewModel.listState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(true) {
+        if (listState.refreshState is UiState.Init) {
+            searchViewModel.refreshAlbumList()
+        }
+    }
 
     SearchScreenViewModeless(
         modifier = modifier,
@@ -112,11 +117,6 @@ fun SearchScreenViewModeless(
         refreshAlbumList()
     })
     val lazyListState = rememberLazyListState()
-    LaunchedEffect(filterParam, searchKeywords) {
-        if (albumCardDisplayItems.isNotEmpty()) {
-            lazyListState.scrollToItem(0)
-        }
-    }
 
     Scaffold(
         modifier = modifier, topBar = {

@@ -17,14 +17,11 @@ import com.grayson.audiocross.presentation.search.model.toRequestParam
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
@@ -40,7 +37,7 @@ class SearchViewModel : ViewModel() {
     companion object {
         private const val TAG = "SearchViewModel"
 
-        private const val SEARCH_DEBOUNCE_TIME = 1500L
+        private const val SEARCH_DEBOUNCE_TIME = 1000L
     }
 
     // endregion
@@ -62,10 +59,7 @@ class SearchViewModel : ViewModel() {
      * album list
      */
     private val _albumList = MutableStateFlow<List<AlbumCardDisplayItem>>(emptyList())
-    val albumList: StateFlow<List<AlbumCardDisplayItem>> =
-        _albumList.onStart { refreshAlbumList() }.stateIn(
-            viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList()
-        )
+    val albumList: StateFlow<List<AlbumCardDisplayItem>> =_albumList
 
     /**
      * request filter param (not include page).
@@ -94,13 +88,6 @@ class SearchViewModel : ViewModel() {
             )
         )
     val listState: StateFlow<ListState> = _listState
-        .onStart { refreshAlbumList() }
-        .stateIn(
-            viewModelScope, started = SharingStarted.Lazily, initialValue = ListState(
-                refreshState = UiState.Init,
-                loadMoreState = UiState.Init
-            )
-        )
 
     /**
      * request job
