@@ -12,7 +12,7 @@ object TestCoroutineHelper {
     /**
      * 单元测试里面用的 Dispatcher
      */
-    val testCoroutineDispatcher = UnconfinedTestDispatcher()
+    private val testCoroutineDispatcher = UnconfinedTestDispatcher()
 
     /**
      * setUp 时调用

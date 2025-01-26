@@ -13,10 +13,6 @@ import com.grayson.audiocross.domain.albumlist.usecase.FetchAlbumListUseCase
 import com.grayson.audiocross.presentation.albumlist.mapper.mapToDisplayItem
 import com.grayson.audiocross.presentation.albumlist.model.AlbumListFilterParam
 import com.grayson.audiocross.presentation.albumlist.model.toRequestParam
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import org.koin.java.KoinJavaComponent.inject
 
@@ -46,31 +42,26 @@ class AlbumListViewModel : ViewModel() {
     /**
      * request filter param (not include page).
      */
-    private val _filterParam = MutableStateFlow(
-        AlbumListFilterParam(
+    private val filterParam = AlbumListFilterParam(
             orderBy = OrderBy.CREATED_DATE, sortMethod = SortMethod.DESCENDING, hasSubtitle = false
         )
-    )
-    val filterParam: StateFlow<AlbumListFilterParam> = _filterParam
 
     /**
      * Paging Flow for display item
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingDataFlow = filterParam.flatMapLatest { filters ->
-        Pager(
+    val pagingDataFlow = Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {
-                useCaseSet.fetchAlbumListUseCase.fetch(filters.toRequestParam(page = 1))
+                useCaseSet.fetchAlbumListUseCase.fetch(filterParam.toRequestParam(page = 1))
             }).flow.map {
             it.map { item ->
                 item.mapToDisplayItem(true)
             }
         }
-    }.cachedIn(viewModelScope)
+    .cachedIn(viewModelScope)
 
     // endregion
 

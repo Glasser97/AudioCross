@@ -10,7 +10,6 @@ AudioCrossApp is a modern audio browsing and playback application designed to se
 
 - **Audio Browsing**: Connect to an audio source and browse available audio tracks effortlessly.
 - **Filtering and Search**: Find specific audio content through advanced filtering and search options.
-- **Default Integration**: Currently integrated with [asmr.one](https://asmr.one) as the default audio source.
 - **High-Quality Playback**: Enjoy smooth audio playback with robust control features.
 
 ---
