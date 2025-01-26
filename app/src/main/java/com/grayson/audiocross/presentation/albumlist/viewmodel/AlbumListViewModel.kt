@@ -3,6 +3,8 @@ package com.grayson.audiocross.presentation.albumlist.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.grayson.audiocross.domain.albumlist.base.OrderBy
@@ -27,6 +29,8 @@ class AlbumListViewModel : ViewModel() {
 
     companion object {
         private const val TAG = "AlbumListViewModel"
+
+        private const val PAGE_SIZE = 20
     }
 
     // endregion
@@ -54,12 +58,18 @@ class AlbumListViewModel : ViewModel() {
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val pagingDataFlow = filterParam.flatMapLatest { filters ->
-        useCaseSet.fetchAlbumListUseCase.fetch(filters.toRequestParam(page = 1))
-            .map {
-                it.map { item ->
-                    item.mapToDisplayItem(true)
-                }
+        Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                useCaseSet.fetchAlbumListUseCase.fetch(filters.toRequestParam(page = 1))
+            }).flow.map {
+            it.map { item ->
+                item.mapToDisplayItem(true)
             }
+        }
     }.cachedIn(viewModelScope)
 
     // endregion

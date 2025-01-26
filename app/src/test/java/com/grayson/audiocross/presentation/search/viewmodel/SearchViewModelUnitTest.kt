@@ -50,7 +50,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
 
     @After
     fun tearDown() {
-        println("Tear down complete. Dispatcher reset.")
+        println("Tear down complete.")
     }
 
     @Test
@@ -69,7 +69,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
             println("Triggering refreshAlbumList with success response.")
 
 
-            // Action
+            // Act
             viewModel.refreshAlbumList()
 
             // Assert
@@ -89,7 +89,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
             val mockError = RequestResult.Error(Exception("Test Error"))
             coEvery { searchAlbumListUseCase.fetch(any()) } returns mockError
 
-            // Action
+            // Act
             viewModel.refreshAlbumList()
 
             // Assert
@@ -116,7 +116,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
             )
             coEvery { searchAlbumListUseCase.fetch(any()) } returns successResult
 
-            // Action
+            // Act
             viewModel.updateKeywords(newKeyword)
             advanceUntilIdle()
 
@@ -149,7 +149,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
             )
             coEvery { searchAlbumListUseCase.fetch(any()) } returns successResult
 
-            // Action
+            // Act
             viewModel.updateFilterParam(newFilterParam)
             advanceUntilIdle()
 
@@ -187,7 +187,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
             additionalResult
         )
 
-        // Action
+        // Act
         viewModel.refreshAlbumList()
         viewModel.loadMoreAlbumList()
 
@@ -216,7 +216,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
             additionalResult
         )
 
-        // Action
+        // Act
         viewModel.refreshAlbumList()
         viewModel.loadMoreAlbumList()
 
@@ -229,7 +229,7 @@ class SearchViewModelUnitTest : BaseUnitTest() {
     }
 
 
-    object MockData {
+    private object MockData {
 
         val albumItem1: AlbumItem = AlbumItem(
             albumId = 1L,

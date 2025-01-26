@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.grayson.audiocross.R
@@ -39,6 +40,7 @@ import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.presentation.albumlist.viewmodel.AlbumListViewModel
 import com.grayson.audiocross.presentation.navigator.viewmodel.AudioCrossViewModel
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -235,6 +237,30 @@ private fun AlbumListTopBarPreview() {
         AlbumListTopBar(
             onClickMenu = {},
             onClickSearch = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AlbumListScreenPreview() {
+    AudioCrossTheme {
+        val albumCardDisplayItems = listOf(
+            AlbumCardDisplayItem(
+                101L,
+                "RJ101", "Title", "Voice Author", "CoverUrl", "2:00:00"
+            ), AlbumCardDisplayItem(
+                102L,
+                "RJ102",
+                "Title is too long, Title is too long, Title is too long, Title is too long, " + "Title is too long, Title is too long, Title is too long, ",
+                "Voice Author",
+                "CoverUrl",
+                "2:00:00"
+            )
+        )
+        val pagingData = MutableStateFlow(PagingData.from(albumCardDisplayItems))
+        AlbumCardListScreenViewModeless(
+            albumCardDisplayItems = pagingData.collectAsLazyPagingItems()
         )
     }
 }

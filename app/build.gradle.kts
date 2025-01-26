@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.paging)
     implementation(libs.androidx.paging.compose)
+    testImplementation(libs.androidx.paging.common)
+    testImplementation(libs.androidx.paging.testing)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
