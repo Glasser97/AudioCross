@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,8 +36,10 @@ import com.grayson.audiocross.presentation.albuminfo.model.TrackDisplayItem
 import com.grayson.audiocross.presentation.albuminfo.viewmodel.AlbumInfoViewModel
 import com.grayson.audiocross.presentation.albumlist.model.AlbumCardDisplayItem
 import com.grayson.audiocross.presentation.albumlist.ui.AlbumCoverImage
+import com.grayson.audiocross.presentation.albumlist.ui.FailedScreen
 import com.grayson.audiocross.presentation.navigator.AudioCrossNavActions
 import com.grayson.audiocross.presentation.navigator.ui.BackTopBar
+import com.grayson.audiocross.presentation.search.model.UiState
 import com.grayson.audiocross.ui.theme.AudioCrossTheme
 import kotlinx.coroutines.flow.update
 import org.koin.java.KoinJavaComponent.inject
@@ -46,11 +49,19 @@ fun AlbumDetailScreenStateless(
     modifier: Modifier = Modifier,
     albumCardDisplayItem: AlbumCardDisplayItem,
     trackList: List<TrackDisplayItem> = emptyList(),
+    pageState: UiState = UiState.Init,
+    onRefresh: () -> Unit = {},
     onClickAudio: (audio: TrackDisplayItem.TrackAudioDisplayItem, audioList: List<TrackDisplayItem.TrackAudioDisplayItem>) -> Unit = { _, _ -> },
     onClickText: (text: TrackDisplayItem.TrackTextDisplayItem) -> Unit = {},
     onClickFolder: (folder: TrackDisplayItem.TrackFolderDisplayItem) -> Unit = {},
     onNavigateUp: () -> Unit = {}
 ) {
+
+    LaunchedEffect(true) {
+        if (pageState == UiState.Init) {
+            onRefresh()
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -77,45 +88,50 @@ fun AlbumDetailScreenStateless(
             }
         }
     ) { innerPadding ->
-        val scrollState: ScrollState = rememberScrollState()
-
-        Column(
-            modifier = modifier
-                .padding(
-                    bottom = innerPadding.calculateBottomPadding(),
-                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
-                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr)
-                )
-                .verticalScroll(scrollState)
-        ) {
-            AlbumDetailCard(
-                albumCardDisplayItem = albumCardDisplayItem
+        if (pageState is UiState.Error) {
+            FailedScreen(
+                modifier.padding(innerPadding),
+                onRetry = { onRefresh() }
             )
+        } else {
+            val scrollState: ScrollState = rememberScrollState()
+            Column(
+                modifier = modifier
+                    .padding(
+                        bottom = innerPadding.calculateBottomPadding(),
+                        start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                        end = innerPadding.calculateEndPadding(LayoutDirection.Ltr)
+                    )
+                    .verticalScroll(scrollState)
+            ) {
+                AlbumDetailCard(
+                    albumCardDisplayItem = albumCardDisplayItem
+                )
+                trackList.forEach {
+                    when (it) {
+                        is TrackDisplayItem.TrackAudioDisplayItem -> {
+                            TrackAudioItemStateLess(
+                                audio = it,
+                                audios = trackList.filterIsInstance<TrackDisplayItem.TrackAudioDisplayItem>(),
+                                onClick = onClickAudio
+                            )
+                        }
 
-            trackList.forEach {
-                when (it) {
-                    is TrackDisplayItem.TrackAudioDisplayItem -> {
-                        TrackAudioItemStateLess(
-                            audio = it,
-                            audios = trackList.filterIsInstance<TrackDisplayItem.TrackAudioDisplayItem>(),
-                            onClick = onClickAudio
-                        )
-                    }
+                        is TrackDisplayItem.TrackTextDisplayItem -> {
+                            TrackTextItemStateLess(
+                                text = it,
+                                onClick = onClickText
+                            )
+                        }
 
-                    is TrackDisplayItem.TrackTextDisplayItem -> {
-                        TrackTextItemStateLess(
-                            text = it,
-                            onClick = onClickText
-                        )
-                    }
-
-                    is TrackDisplayItem.TrackFolderDisplayItem -> {
-                        TrackFolderItemStateLess(
-                            folder = it,
-                            onClickAudio = onClickAudio,
-                            onClickText = onClickText,
-                            onClick = onClickFolder
-                        )
+                        is TrackDisplayItem.TrackFolderDisplayItem -> {
+                            TrackFolderItemStateLess(
+                                folder = it,
+                                onClickAudio = onClickAudio,
+                                onClickText = onClickText,
+                                onClick = onClickFolder
+                            )
+                        }
                     }
                 }
             }
@@ -134,12 +150,15 @@ fun AlbumDetailScreen(
 ) {
     val displayItem by viewModel.albumInfo.collectAsStateWithLifecycle()
     val trackList by viewModel.albumTracks.collectAsStateWithLifecycle()
+    val pageState by viewModel.pageState.collectAsStateWithLifecycle()
     val player: IAudioPlayer by remember { inject(IAudioPlayer::class.java) }
 
     AlbumDetailScreenStateless(
         modifier = modifier,
         albumCardDisplayItem = displayItem,
         trackList = trackList,
+        pageState = pageState,
+        onRefresh = { viewModel.fetchData() },
         onClickAudio = { audioDisplayItem, audioDisplayItems ->
             player.play(
                 audioDisplayItems.map { it.domainData },
