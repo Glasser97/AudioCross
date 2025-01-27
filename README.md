@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-AudioCross-blue)](https://github.com/Glasser97/AudioCross)
 
-AudioCrossApp is a modern audio browsing and playback application designed to seamlessly connect to audio sources. With a user-friendly interface and advanced filtering capabilities, users can explore and listen to their favorite audio content. The app currently integrates with the default audio source: [asmr.one](https://asmr.one).
+AudioCrossApp is a modern audio browsing and playback application designed to seamlessly connect to audio sources. With a user-friendly interface and advanced filtering capabilities, users can explore and listen to their favorite audio content. The app currently integrates with the default audio source: **asmr.one**.
 
 ---
 
@@ -19,11 +19,12 @@ AudioCrossApp is a modern audio browsing and playback application designed to se
 This application leverages a modern tech stack to deliver a responsive, efficient, and maintainable experience:
 
 - **Audio Parsing & Playback**: [ExoPlayer](https://github.com/google/ExoPlayer)
-- **UI Construction**: [Jetpack Compose](https://developer.android.com/jetpack/compose)
+- **UI Construction**: [Jetpack Compose](https://developer.android.com/jetpack/compose), [Paging 3](https://developer.android.com/topic/libraries/architecture/paging/v3-overview)
 - **Networking**: [Ktor](https://ktor.io/)
 - **Image Loading**: [Coil](https://coil-kt.github.io/coil/)
 - **Data Persistence**: [Room](https://developer.android.com/jetpack/androidx/releases/room)
 - **Dependency Injection**: [Koin](https://insert-koin.io/)
+- **Testing**:  [JUnit](https://junit.org/junit4/), [Mockk](https://mockk.io/)
 - **Architecture**: MVVM + Clean Architecture (Presentation, Domain, and Data layers)
 
 ---

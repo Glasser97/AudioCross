@@ -2,7 +2,6 @@ package com.grayson.audiocross.presentation.player
 
 import android.content.ComponentName
 import android.content.Context
-import android.health.connect.datatypes.SpeedRecord
 import android.os.Bundle
 import android.util.Log
 import androidx.media3.common.MediaItem
@@ -21,8 +20,6 @@ import com.grayson.audiocross.domain.player.PlayerState
 import com.grayson.audiocross.domain.player.PlayingState
 import com.grayson.audiocross.domain.player.hasNext
 import com.grayson.audiocross.domain.player.hasPrevious
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -320,7 +317,7 @@ fun MediaItem.toAudio(): TrackItem.Audio? {
 
 // endregion
 
-// region endregion
+// region delegate function
 
 private operator fun <T> MutableStateFlow<T>.setValue(
     thisObj: Any?,

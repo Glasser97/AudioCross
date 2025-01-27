@@ -59,8 +59,8 @@ class MainActivity : ComponentActivity() {
                                 && currentRoute != AudioCrossDestinations.PLAYER_ROUTE
                         AnimatedVisibility(
                             visible = isBottomBarVisible,
-                            enter = slideInVertically(initialOffsetY = { it }), // 从底部进入
-                            exit = slideOutVertically(targetOffsetY = { it }) // 向底部退出
+                            enter = slideInVertically(initialOffsetY = { it }), // Slide in from bottom
+                            exit = slideOutVertically(targetOffsetY = { it }) // Slide out to bottom
                         ) {
                             PlayerBarStateful(
                                 viewModel = playerViewModel,
