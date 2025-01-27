@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-AudioCross-blue)](https://github.com/Glasser97/AudioCross)
 
-AudioCrossApp is a modern audio browsing and playback application designed to seamlessly connect to audio sources. With a user-friendly interface and advanced filtering capabilities, users can explore and listen to their favorite audio content. The app currently integrates with the default audio source: **asmr.one**.
+AudioCrossApp is a modern audio browsing and playback application designed to seamlessly connect to audio sources. With a user-friendly interface and advanced filtering capabilities, users can explore and listen to their favorite audio content. The app currently integrates with the default audio source.
 
 ---
 
