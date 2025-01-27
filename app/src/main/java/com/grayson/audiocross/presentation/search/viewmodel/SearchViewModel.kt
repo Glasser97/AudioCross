@@ -66,7 +66,7 @@ class SearchViewModel : ViewModel() {
      */
     private val _filterParam = MutableStateFlow(
         AlbumListFilterParam(
-            orderBy = OrderBy.CREATED_DATE, sortMethod = SortMethod.DESCENDING, hasSubtitle = false
+            orderBy = OrderBy.REVIEW_COUNT, sortMethod = SortMethod.DESCENDING, hasSubtitle = false
         )
     )
     val filterParam: StateFlow<AlbumListFilterParam> = _filterParam

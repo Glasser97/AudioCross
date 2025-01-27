@@ -43,7 +43,7 @@ class AlbumListViewModel : ViewModel() {
      * request filter param (not include page).
      */
     private val filterParam = AlbumListFilterParam(
-            orderBy = OrderBy.CREATED_DATE, sortMethod = SortMethod.DESCENDING, hasSubtitle = false
+            orderBy = OrderBy.REVIEW_COUNT, sortMethod = SortMethod.DESCENDING, hasSubtitle = false
         )
 
     /**

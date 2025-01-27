@@ -26,14 +26,14 @@ internal object GlobalProperties {
             const val Register = "auth/reg"
 
             // WorksRepo
-            const val AllWorks = "search/\$age:general\$"
+            const val AllWorks = "search/\$age:general\$ 搞笑"
 
             // WorkDetail
             const val WorkInfo = "work"
             const val WorkTracks = "tracks"
 
             // SearchRepo
-            const val SearchWorks = "search/\$age:general\$"
+            const val SearchWorks = "search/\$age:general\$ 搞笑"
         }
     }
 }
